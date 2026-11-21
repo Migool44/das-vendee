@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>DAS Vendée Eau v1.6</title>
+<title>DAS Vendée Eau v1.7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Herr+Von+Muellerhoff&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -49,6 +49,7 @@
   .status.err{background:#fdeaea;color:#9b1c1c}
   .status.warn{background:#fff4e0;color:#8a5300}
   details summary{cursor:pointer;color:var(--c2);font-weight:600}
+  .sub{border:1px solid var(--bd);border-radius:6px;padding:8px 10px;background:#f8fbfd}
   #log{font:12px/1.45 Consolas,monospace;background:#0f1a22;color:#cfe3f1;border-radius:6px;padding:8px;max-height:180px;overflow:auto;white-space:pre-wrap}
   .muted{color:#7a8a96;font-size:12px}
   .hidden{display:none !important}
@@ -57,7 +58,7 @@
 <body>
 <div id="noJs" class="nojs">⛔ Les scripts de la page ne démarrent pas. Le code a sans doute été copié depuis l'aperçu (Cloudflare) : recolle-le depuis l'artifact « code » (aucun « rocket-loader » ne doit apparaître).</div>
 <div class="wrap">
-  <header><h1>💧 DAS Vendée Eau</h1><small>v1.6</small></header>
+  <header><h1>💧 DAS Vendée Eau</h1><small>v1.7</small></header>
 
   <!-- ===== Accès protégé ===== -->
   <div class="card">
@@ -78,45 +79,70 @@
     <div class="card">
       <h2>Préréglage</h2>
       <div class="row">
-        <select id="preset" style="max-width:260px"><option value="">— préréglage —</option></select>
+ <select id="preset" style="max-width:260px"><option value="">— préréglage —</option></select>
         <button id="pSave" title="Enregistrer le préréglage">💾</button>
         <button id="pRename" title="Renommer">🏷</button>
         <button id="pDel" title="Supprimer">🗑</button>
+ <span style="flex:1"></span>
+        <button id="pExport" class="sm" title="Télécharger un fichier avec tes préréglages, intervenants, adresses en copie et sites ajoutés">⬇ Exporter mes réglages</button>
+        <label class="btn sm" title="Reprendre les réglages exportés depuis un autre PC">⬆ Importer<input type="file" id="pImport" accept=".json,application/json" hidden></label>
       </div>
     </div>
 
     <div class="card">
       <h2>Intervention</h2>
       <div class="grid">
- <label class="f full">Réservoir / site
-          <select id="site"></select>
- </label>
+        <label class="f full">Réservoir / site
+   <select id="site"></select>
+        </label>
+        <div class="full">
+   <details id="addSiteBox" class="sub">
+            <summary>＋ Ajouter un château d'eau absent de la liste</summary>
+     <div class="grid" style="margin-top:8px">
+       <label class="f">Code (5 chiffres)
+         <input type="text" id="nsCode" maxlength="5" inputmode="numeric" placeholder="85000">
+       </label>
+       <label class="f" style="grid-column:span 2">Nom (comme sur le PDF)
+  <input type="text" id="nsName" placeholder="Commune / réservoir">
+       </label>
+       <label class="f full">Nom tel qu'il apparaîtra dans la liste (modifiable)
+         <input type="text" id="nsFinal">
+       </label>
+       <div class="full muted" id="nsInfo"></div>
+       <div class="full row"><button id="nsAdd">＋ Ajouter à la liste</button></div>
+       <div class="full">
+  <div class="muted" style="margin-bottom:4px">Sites que tu as ajoutés</div>
+  <div class="people" id="nsList"></div>
+       </div>
+     </div>
+          </details>
+        </div>
         <label class="f">Date
           <input type="date" id="date">
-        </label>
+ </label>
         <label class="f">Heure d'ouverture
    <select id="heure"></select>
  </label>
         <label class="f">Durée
           <input type="text" id="duree" list="dlDuree" placeholder="2h">
- </label>
+        </label>
         <div class="row" style="align-self:end">
           <button class="sm" id="dToday">Aujourd'hui</button>
    <button class="sm" id="dTomorrow">Demain</button>
           <button class="sm" id="d10">+10 j</button>
         </div>
-        <label class="f full">Objet de la demande
+ <label class="f full">Objet de la demande
           <textarea id="objet"></textarea>
  </label>
         <div class="full">
    <div class="muted">Nature de l'intervention</div>
    <div class="row" style="gap:16px;margin-top:4px">
-     <label class="chk"><input type="checkbox" id="cPortail"> Ouverture portail</label>
+            <label class="chk"><input type="checkbox" id="cPortail"> Ouverture portail</label>
      <label class="chk"><input type="checkbox" id="cPortillon"> Accès baie par portillon</label>
      <label class="chk"><input type="checkbox" id="cChateau"> Ouverture château d'eau</label>
    </div>
         </div>
-        <label class="f">Date courrier d'accord (si travaux)
+ <label class="f">Date courrier d'accord (si travaux)
    <input type="date" id="courrier">
  </label>
         <label class="f">Tél. intervenant en cas de problème
@@ -130,24 +156,24 @@
       <h2>Demandeur et intervenants</h2>
       <div class="grid">
         <label class="f">Opérateur demandeur
-   <input type="text" id="op" value="FREE">
+          <input type="text" id="op" value="FREE">
         </label>
  <label class="f">Entreprise intervenante
           <input type="text" id="ent" value="FREE">
-        </label>
+ </label>
         <label class="f full">Responsable (nom, mail, tél.)
           <input type="text" id="resp" list="dlResp">
- </label>
+        </label>
         <div class="full">
    <div class="muted" style="margin-bottom:4px">Intervenants (cocher les présents)</div>
           <div class="people" id="people"></div>
-   <div class="row">
+          <div class="row">
      <input type="text" id="pName" placeholder="NOM Prénom" style="flex:2;min-width:160px">
      <input type="text" id="pSoc" placeholder="Société" value="FREE" style="flex:1;min-width:90px">
      <button id="pAdd">＋ Ajouter</button>
           </div>
-        </div>
- <label class="f full">Immatriculation(s) du/des véhicule(s)
+ </div>
+        <label class="f full">Immatriculation(s) du/des véhicule(s)
           <input type="text" id="plaque" list="dlPlaque">
         </label>
       </div>
@@ -158,17 +184,17 @@
       <div class="grid">
         <label class="chk full"><input type="checkbox" id="sigOn" checked> Ajouter une signature générée à partir du nom</label>
  <label class="f">Signataire
-          <select id="sigWho"></select>
+   <select id="sigWho"></select>
         </label>
         <label class="f">Forme
-   <select id="sigStyle">
-            <option value="init">Initiale + nom</option>
+          <select id="sigStyle">
+     <option value="init">Initiale + nom</option>
      <option value="full">Nom complet</option>
      <option value="paraphe">Paraphe (initiales)</option>
    </select>
         </label>
         <label class="f">Écriture
-          <select id="sigFont">
+   <select id="sigFont">
      <option>Herr Von Muellerhoff</option>
      <option>Mrs Saint Delafield</option>
      <option>Great Vibes</option>
@@ -179,17 +205,33 @@
     </div>
 
     <div class="card">
+      <h2>Mail</h2>
+      <div class="grid">
+        <div class="full row" style="gap:16px">
+   <label class="chk"><input type="checkbox" id="cc"> <span id="ccLabel">Copie (cc)</span></label>
+          <label class="chk">Messagerie :
+     <select id="mailApp" style="width:auto">
+       <option value="web">Outlook web</option>
+       <option value="pc">Outlook PC (application)</option>
+     </select>
+   </label>
+        </div>
+ <div class="full">
+          <div class="muted" style="margin-bottom:4px">Autres adresses en copie (cocher celles à mettre en copie ; elles restent enregistrées sur ce PC)</div>
+   <div class="people" id="ccList"></div>
+          <div class="row">
+     <input type="text" id="ccNew" placeholder="adresse@exemple.fr (plusieurs possibles, séparées par ; )" style="flex:1;min-width:220px">
+     <button id="ccAdd">＋ Ajouter</button>
+          </div>
+ </div>
+      </div>
+    </div>
+
+    <div class="card">
       <div class="actions">
         <button class="main" id="genPdf">📄 Générer le PDF</button>
- <button class="main" id="genMail">✉️ PDF + mail</button>
- <label class="chk"><input type="checkbox" id="cc"> <span id="ccLabel">Copie (cc)</span></label>
-        <label class="chk">Messagerie :
-   <select id="mailApp" style="width:auto">
-     <option value="web">Outlook web</option>
-     <option value="pc">Outlook PC (application)</option>
-          </select>
-        </label>
- <span id="msg"></span>
+        <button class="main" id="genMail">✉️ PDF + mail</button>
+        <span id="msg"></span>
       </div>
       <p class="muted" style="margin:8px 0 0">Le PDF est téléchargé, puis il faut le glisser dans le mail (ni le navigateur ni Outlook web ne peuvent joindre un fichier tout seuls).</p>
     </div>
@@ -203,26 +245,26 @@
       <div class="grid">
         <div class="full row">
           <label class="btn">📂 1. Choisir le PDF<input type="file" id="admFile" accept="application/pdf,.pdf" hidden></label>
-          <span id="admInfo" class="muted">Aucun PDF choisi.</span>
+   <span id="admInfo" class="muted">Aucun PDF choisi.</span>
  </div>
         <label class="f full">2. Liste des sites (un par ligne, reprise automatiquement du PDF)
           <textarea id="admSites" style="min-height:120px"></textarea>
         </label>
-        <label class="f">3. Destinataire du mail
+ <label class="f">3. Destinataire du mail
           <input type="email" id="admTo" placeholder="adresse d'ouverture des sites">
         </label>
- <label class="f">Copie (facultatif)
+        <label class="f">Copie (facultatif)
    <input type="email" id="admCc" placeholder="adresse en copie">
         </label>
-        <label class="f">4. Mot de passe (12 caractères min.)
-   <input type="password" id="admPwd1" autocomplete="new-password">
-        </label>
+ <label class="f">4. Mot de passe (12 caractères min.)
+          <input type="password" id="admPwd1" autocomplete="new-password">
+ </label>
         <label class="f">Confirmer le mot de passe
-   <input type="password" id="admPwd2" autocomplete="new-password">
-        </label>
+          <input type="password" id="admPwd2" autocomplete="new-password">
+ </label>
         <div class="full row">
           <button id="admEnc" class="main">🔒 5. Créer formulaire.enc</button>
- </div>
+        </div>
       </div>
     </details>
   </div>
@@ -243,13 +285,15 @@
 'use strict';
 document.getElementById('noJs').remove();
 
-const VERSION = '1.6';
+const VERSION = '1.7';
 const ENC_URL = 'formulaire.enc';          // fichier chiffré, à côté de index.html sur GitHub
 const MAGIC = 'VDE1', PBKDF2_ITER = 600000;
 /* Position de la signature sur la page 2 (en points, A4 = 595 x 842, mesuré depuis le HAUT) */
 const SIG_X = 95, SIG_TOP = 738, SIG_MAXW = 310, SIG_MAXH = 88;
 /* Outlook web : fenêtre de rédaction (redirige vers outlook.cloud.microsoft) */
 const OWA_COMPOSE = 'https://outlook.office.com/mail/deeplink/compose';
+/* Séparateur des adresses en copie (Outlook accepte le point-virgule) */
+const CC_SEP = ';';
 
 const $ = id => document.getElementById(id);
 const LS = {
@@ -257,9 +301,10 @@ const LS = {
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
 };
 const K_PRESETS='vde.presets.v1', K_LAST='vde.last.v1', K_PEOPLE='vde.people.v1', K_HIST='vde.hist.v1';
+const K_CCM='vde.ccmails.v1', K_XSITES='vde.sites.extra.v1';
 
 /* Rien de sensible ici : sites, adresses mail et PDF sont dans formulaire.enc */
-let SITES = [], MAIL_TO = '', MAIL_CC = '', TPL = null;
+let BASE_SITES = [], SITES = [], MAIL_TO = '', MAIL_CC = '', TPL = null;
 let encBytes = null, encHash = null, uiReady = false;
 
 /* ---------- utilitaires ---------- */
@@ -270,6 +315,8 @@ const parseIso = s => { const [y,m,d] = s.split('-').map(Number); return new Dat
 const tc = s => String(s||'').toLowerCase().replace(/(^|[\s\-'’])(\p{L})/gu, (m,a,b) => a + b.toUpperCase());
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 const clean = s => String(s ?? '').replace(/\u00A0/g,' ').replace(/[^\x20-\x7E\u00A0-\u00FF\u2018\u2019\u201C\u201D\u2013\u2014\u2026\u20AC\u0152\u0153\u2022]/g, '?');
+const EMAIL_RE = /^[^\s@;,<>"]+@[^\s@;,<>"]+\.[^\s@;,<>"]+$/;
+const coll = new Intl.Collator('fr', {sensitivity:'base', numeric:true});
 function log(t){
   const el = $('log'); const d = new Date();
   el.textContent += '['+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())+'] '+t+'\n';
@@ -283,6 +330,11 @@ window.addEventListener('unhandledrejection', e => log('❌ Erreur : ' + (e.reas
 
 function b64ToBytes(b){ const bin = atob(b); const u = new Uint8Array(bin.length); for(let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
 function bytesToB64(u){ let s = ''; for(let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); }
+function download(blob, name){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+}
 
 /* ---------- chiffrement (AES-GCM 256 + PBKDF2-SHA256) ---------- */
 const te = new TextEncoder(), td = new TextDecoder();
@@ -339,18 +391,124 @@ function readOptions(form, name){
   try{ const f = form.getField(name); return f.getOptions ? f.getOptions().map(String).filter(Boolean) : []; }catch(e){ return []; }
 }
 
-/* ---------- listes ---------- */
+/* ---------- heures ---------- */
 {
   const o = [];
   for(let h = 6; h <= 20; h++) for(const m of [0,15,30,45]){ if(h === 20 && m) break; o.push(pad(h)+':'+pad(m)); }
   $('heure').innerHTML = o.map(x => '<option>'+x+'</option>').join('');
+}
+
+/* ---------- sites (liste officielle + châteaux d'eau ajoutés) ---------- */
+let xSites = LS.get(K_XSITES, []);
+function siteParts(s){
+  const m = String(s).match(/^\s*(\d{5})(\s*[-–:]?\s*)(.*)$/);
+  return m ? {code: m[1], sep: m[2], name: m[3].trim()} : null;
+}
+/* Disposition des noms : séparateur entre code et nom, majuscules ou non */
+function siteModel(){
+  const parts = BASE_SITES.map(siteParts).filter(Boolean);
+  const cnt = {}; parts.forEach(p => { cnt[p.sep] = (cnt[p.sep] || 0) + 1; });
+  const seps = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a]);
+  const sep = seps.length ? seps[0] : ' ';
+  const letters = parts.map(p => p.name.replace(/[^\p{L}]/gu, '')).join('');
+  return {sep: sep || ' ', upper: !!letters && letters === letters.toUpperCase()};
+}
+function formatSite(code, name){
+  const md = siteModel();
+  name = String(name || '').trim().replace(/\s+/g, ' ');
+  if(md.upper) name = name.toUpperCase();
+  return (code + md.sep + name).trim();
+}
+/* Ordre de la liste officielle : par code, par nom, alphabétique, ou non reconnu */
+function orderMode(list){
+  if(list.length < 2) return 'code';
+  const ps = list.map(siteParts);
+  const all = ps.every(Boolean);
+  const sorted = cmp => list.every((s, i) => i === 0 || cmp(list[i-1], s) <= 0);
+  if(all && sorted(cmpBy('code'))) return 'code';
+  if(all && sorted(cmpBy('name'))) return 'name';
+  if(sorted(cmpBy('text'))) return 'text';
+  return 'end';
+}
+function cmpBy(mode){
+  const P = s => siteParts(s) || {code: '99999', name: String(s)};
+  if(mode === 'code') return (a, b) => { const x = P(a), y = P(b); return x.code.localeCompare(y.code) || coll.compare(x.name, y.name); };
+  if(mode === 'name') return (a, b) => { const x = P(a), y = P(b); return coll.compare(x.name, y.name) || x.code.localeCompare(y.code); };
+  return (a, b) => coll.compare(a, b);
+}
+function insertSorted(list, s, mode){
+  const r = list.slice();
+  if(mode === 'end'){ r.push(s); return r; }
+  const c = cmpBy(mode);
+  let i = r.findIndex(x => c(s, x) < 0);
+  if(i < 0) i = r.length;
+  r.splice(i, 0, s);
+  return r;
 }
 function renderSites(keep){
   $('site').innerHTML = SITES.map(s => '<option>'+esc(s)+'</option>').join('');
   if(keep && SITES.includes(keep)) $('site').value = keep;
   else if(SITES.length) $('site').selectedIndex = 0;
 }
+function rebuildSites(keep){
+  if(keep === undefined) keep = $('site').value;
+  const mode = orderMode(BASE_SITES);
+  let list = BASE_SITES.slice();
+  xSites.forEach(s => { if(!list.some(x => coll.compare(x, s) === 0)) list = insertSorted(list, s, mode); });
+  SITES = list;
+  renderSites(keep); renderXSites(); nsPreview();
+}
+function renderXSites(){
+  const box = $('nsList'); box.innerHTML = '';
+  if(!xSites.length){ box.innerHTML = '<div class="muted">Aucun.</div>'; return; }
+  xSites.forEach((s, i) => {
+    const row = document.createElement('div'); row.className = 'person';
+    const sp = document.createElement('span'); sp.textContent = s;
+    if(BASE_SITES.some(x => coll.compare(x, s) === 0)) sp.textContent += '  (désormais dans la liste officielle)';
+    const del = document.createElement('button'); del.textContent = '×'; del.title = 'Retirer ce site';
+    del.onclick = () => { if(!confirm('Retirer « '+s+' » de la liste ?')) return;
+      xSites.splice(i, 1); LS.set(K_XSITES, xSites); rebuildSites(); saveLast(); log('Site retiré : '+s); };
+    row.append(sp, del); box.appendChild(row);
+  });
+}
+function nsAuto(){
+  const code = $('nsCode').value.replace(/\D/g, '').slice(0, 5), name = $('nsName').value;
+  $('nsCode').value = code;
+  $('nsFinal').value = (code || name.trim()) ? formatSite(code, name) : '';
+  nsPreview();
+}
+function nsPreview(){
+  const info = $('nsInfo'), f = $('nsFinal').value.trim();
+  const ex = BASE_SITES[0] ? 'Modèle de la liste : « ' + BASE_SITES[0] + ' ». ' : '';
+  if(!f){ info.textContent = ex; return; }
+  const mode = orderMode(BASE_SITES);
+  const list = insertSorted(SITES, f, mode), i = list.indexOf(f);
+  const before = list[i-1], after = list[i+1];
+  const modeTxt = {code: 'ordre des codes', name: 'ordre alphabétique des noms', text: 'ordre alphabétique', end: 'ordre de la liste non reconnu : ajout en fin'}[mode];
+  info.textContent = ex + 'Position : ' + (before ? 'après « ' + before + ' »' : 'en tête de liste') +
+    (after ? ', avant « ' + after + ' »' : ', en fin de liste') + ' (' + modeTxt + ').';
+}
+$('nsCode').addEventListener('input', nsAuto);
+$('nsName').addEventListener('input', nsAuto);
+$('nsFinal').addEventListener('input', nsPreview);
+$('nsAdd').onclick = () => {
+  const f = $('nsFinal').value.trim().replace(/\s+/g, ' ');
+  if(!f){ alert('Renseigne le code et le nom du site.'); return; }
+  const p = siteParts(f);
+  if(!p && !confirm('« '+f+' » ne commence pas par un code à 5 chiffres comme les autres sites. Ajouter quand même ?')) return;
+  if(p && !p.name){ alert('Il manque le nom du site.'); return; }
+  if(SITES.some(x => coll.compare(x, f) === 0)){ alert('Ce site est déjà dans la liste.'); return; }
+  if(p){
+    const same = SITES.filter(x => { const q = siteParts(x); return q && q.code === p.code; });
+    if(same.length && !confirm('Le code ' + p.code + ' existe déjà :\n' + same.join('\n') + '\n\nAjouter quand même « ' + f + ' » ?')) return;
+  }
+  xSites.push(f); LS.set(K_XSITES, xSites);
+  rebuildSites(f); saveLast();
+  $('nsCode').value = ''; $('nsName').value = ''; $('nsFinal').value = ''; nsPreview();
+  log('Château d\'eau ajouté : ' + f);
+};
 
+/* ---------- intervenants / historique ---------- */
 let people = LS.get(K_PEOPLE, []);
 let checked = new Set();
 let hist = Object.assign({resp:[], plaque:[], tel:[]}, LS.get(K_HIST, {}));
@@ -393,6 +551,46 @@ $('pAdd').onclick = () => {
 };
 $('pName').addEventListener('keydown', e => { if(e.key === 'Enter') $('pAdd').click(); });
 
+/* ---------- adresses en copie ---------- */
+let ccMails = LS.get(K_CCM, []);
+let ccChecked = new Set();
+const sameMail = (a, b) => a.toLowerCase() === b.toLowerCase();
+function renderCc(){
+  const box = $('ccList'); box.innerHTML = '';
+  if(!ccMails.length){ box.innerHTML = '<div class="muted">Aucune adresse enregistrée.</div>'; return; }
+  ccMails.forEach((m, i) => {
+    const row = document.createElement('label'); row.className = 'person';
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = ccChecked.has(m);
+    cb.onchange = () => { cb.checked ? ccChecked.add(m) : ccChecked.delete(m); saveLast(); };
+    const sp = document.createElement('span'); sp.textContent = m;
+    const del = document.createElement('button'); del.textContent = '×'; del.title = 'Supprimer cette adresse';
+    del.onclick = e => { e.preventDefault(); if(!confirm('Supprimer '+m+' ?')) return;
+      ccMails.splice(i, 1); ccChecked.delete(m); LS.set(K_CCM, ccMails); renderCc(); saveLast(); };
+    row.append(cb, sp, del); box.appendChild(row);
+  });
+}
+$('ccAdd').onclick = () => {
+  const parts = $('ccNew').value.split(/[;,\s]+/).map(s => s.trim()).filter(Boolean);
+  if(!parts.length) return;
+  const bad = parts.filter(p => !EMAIL_RE.test(p));
+  if(bad.length){ alert('Adresse(s) invalide(s) : ' + bad.join(', ')); return; }
+  parts.forEach(p => {
+    let m = ccMails.find(x => sameMail(x, p));
+    if(!m){ ccMails.push(p); m = p; }
+    ccChecked.add(m);
+  });
+  LS.set(K_CCM, ccMails); $('ccNew').value = ''; renderCc(); saveLast();
+  log('Adresse(s) en copie ajoutée(s) : ' + parts.join(', '));
+};
+$('ccNew').addEventListener('keydown', e => { if(e.key === 'Enter') $('ccAdd').click(); });
+function ccAddresses(){
+  const l = [];
+  const add = m => { if(m && !sameMail(m, MAIL_TO) && !l.some(x => sameMail(x, m))) l.push(m); };
+  if($('cc').checked && MAIL_CC) add(MAIL_CC);
+  ccMails.filter(m => ccChecked.has(m)).forEach(add);
+  return l;
+}
+
 function refreshSigWho(){
   const sel = $('sigWho'), cur = sel.value;
   const list = people.filter(p => checked.has(p.n));
@@ -423,16 +621,19 @@ function getState(){
   const s = {};
   FIELDS.forEach(id => { const el = $(id); s[id] = el.type === 'checkbox' ? el.checked : el.value; });
   s.checked = [...checked];
+  s.ccChecked = [...ccChecked];
   return s;
 }
 function applyState(s){
   if(!s) return;
   checked = new Set(s.checked || []);
-  renderPeople(); refreshSigWho();
+  if(Array.isArray(s.ccChecked)) ccChecked = new Set(s.ccChecked.filter(m => ccMails.includes(m)));
+  renderPeople(); refreshSigWho(); renderCc();
   FIELDS.forEach(id => { if(!(id in s)) return; const el = $(id);
-    if(el.type === 'checkbox') el.checked = !!s[id]; else el.value = s[id]; });
+    if(el.type === 'checkbox'){ if(!el.disabled) el.checked = !!s[id]; } else el.value = s[id]; });
   if(!$('site').value && SITES.length) $('site').selectedIndex = 0;
   if(!$('heure').value) $('heure').value = '09:00';
+  if(!$('mailApp').value) $('mailApp').value = 'web';
   renderSig();
 }
 function saveLast(){ if(uiReady) LS.set(K_LAST, getState()); }
@@ -465,6 +666,52 @@ $('pDel').onclick = () => {
   const ps = LS.get(K_PRESETS, {}); delete ps[n]; LS.set(K_PRESETS, ps); renderPresets();
   log('Préréglage supprimé : '+n);
 };
+
+/* ---------- export / import des réglages (changement de PC) ---------- */
+$('pExport').onclick = () => {
+  const data = {
+    app: 'das-vendee', type: 'reglages', v: 1, version: VERSION, exported: new Date().toISOString(),
+    presets: LS.get(K_PRESETS, {}), people, hist, ccMails, extraSites: xSites, last: getState()
+  };
+  const name = 'das-vendee-reglages_' + isoDate(new Date()) + '.json';
+  download(new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'}), name);
+  log('⬇ Réglages exportés : ' + name + ' (' + Object.keys(data.presets).length + ' préréglage(s)).');
+};
+$('pImport').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if(!f) return;
+  try{
+    let d;
+    try{ d = JSON.parse(await f.text()); }catch(_){ throw new Error('fichier illisible.'); }
+    if(!d || d.app !== 'das-vendee') throw new Error('ce fichier n\'est pas une sauvegarde DAS Vendée Eau.');
+    const ps = LS.get(K_PRESETS, {}), inc = (d.presets && typeof d.presets === 'object') ? d.presets : {};
+    const clash = Object.keys(inc).filter(n => n in ps);
+    if(!confirm('Importer ' + Object.keys(inc).length + ' préréglage(s), les intervenants, les adresses en copie et les sites ajoutés ?' +
+      (clash.length ? '\n\nPréréglages remplacés (même nom) : ' + clash.join(', ') : '') +
+      '\n\nRien ne sera supprimé sur ce PC.')) return;
+    Object.assign(ps, inc); LS.set(K_PRESETS, ps);
+    let nP = 0, nM = 0, nS = 0;
+    (Array.isArray(d.people) ? d.people : []).forEach(p => {
+      if(p && p.n && !people.some(x => x.n === String(p.n))){ people.push({n: String(p.n), s: String(p.s || 'FREE')}); nP++; }
+    });
+    LS.set(K_PEOPLE, people);
+    ['resp','plaque','tel'].forEach(k => ((d.hist && d.hist[k]) || []).forEach(v => addHistSoft(k, v)));
+    LS.set(K_HIST, hist); renderHist();
+    (Array.isArray(d.ccMails) ? d.ccMails : []).forEach(m => {
+      m = String(m).trim(); if(EMAIL_RE.test(m) && !ccMails.some(x => sameMail(x, m))){ ccMails.push(m); nM++; }
+    });
+    LS.set(K_CCM, ccMails);
+    (Array.isArray(d.extraSites) ? d.extraSites : []).forEach(s => {
+      s = String(s).trim(); if(s && !xSites.some(x => coll.compare(x, s) === 0)){ xSites.push(s); nS++; }
+    });
+    LS.set(K_XSITES, xSites);
+    rebuildSites();
+    renderPresets();
+    if(d.last && confirm('Reprendre aussi le dernier formulaire saisi sur l\'autre PC ?')){ applyState(d.last); checkDate(); }
+    else { renderPeople(); refreshSigWho(); renderCc(); }
+    saveLast();
+    log('⬆ Réglages importés : ' + Object.keys(inc).length + ' préréglage(s), ' + nP + ' intervenant(s), ' + nM + ' adresse(s), ' + nS + ' site(s) ajouté(s).');
+  }catch(err){ alert('Import impossible : ' + err.message); log('⛔ Import : ' + err.message); }
+});
 
 /* ---------- signature ---------- */
 function hash(s){ let h = 2166136261; for(const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; }
@@ -507,7 +754,7 @@ async function applyBundle(b){
   if(!b || !b.pdf) throw new Error('Contenu déchiffré invalide.');
   await ensurePdfLib();
   TPL = b64ToBytes(b.pdf);
-  SITES = (b.sites || []).map(s => String(s).trim()).filter(Boolean);
+  BASE_SITES = (b.sites || []).map(s => String(s).trim()).filter(Boolean);
   MAIL_TO = b.mailTo || ''; MAIL_CC = b.mailCc || '';
   const s = b.sugg || {};
   (s.resp || []).forEach(v => addHistSoft('resp', v));
@@ -518,13 +765,13 @@ async function applyBundle(b){
   (s.people || []).forEach(p => { if(p && p.n && !people.some(x => x.n === p.n)){ people.push({n: p.n, s: p.s || 'FREE'}); added++; } });
   if(added) LS.set(K_PEOPLE, people);
 
-  $('ccLabel').textContent = MAIL_CC ? 'Copie à ' + MAIL_CC : 'Copie (aucune adresse définie)';
+  $('ccLabel').textContent = MAIL_CC ? 'Copie à ' + MAIL_CC : 'Copie Vendée Eau (aucune adresse définie)';
   $('cc').disabled = !MAIL_CC;
 
   const keep = uiReady ? $('site').value : (LS.get(K_LAST, {}) || {}).site;
-  renderSites(keep);
+  rebuildSites(keep || '');
   if(!uiReady){
-    renderPresets(); renderPeople();
+    renderPresets(); renderPeople(); renderCc();
     const last = LS.get(K_LAST, null);
     if(last) applyState(last);
     else {
@@ -536,10 +783,10 @@ async function applyBundle(b){
     uiReady = true;
     setDate(10);
     $('courrier').value = '';
-  } else { renderPeople(); refreshSigWho(); }
+  } else { renderPeople(); refreshSigWho(); renderCc(); }
   $('app').classList.remove('hidden');
   if(!MAIL_TO) log('⚠ Aucune adresse destinataire dans formulaire.enc : le mail s\'ouvrira sans destinataire.');
-  log('Formulaire prêt : ' + SITES.length + ' site(s)' + (added ? ', ' + added + ' intervenant(s) ajouté(s)' : '') + '.');
+  log('Formulaire prêt : ' + BASE_SITES.length + ' site(s)' + (xSites.length ? ' + ' + xSites.length + ' ajouté(s)' : '') + (added ? ', ' + added + ' intervenant(s) ajouté(s)' : '') + '.');
 }
 
 /* ---------- démarrage / déverrouillage ---------- */
@@ -659,10 +906,7 @@ $('admEnc').onclick = async () => {
     const enc = await encryptBundle(bundle, p1);
     const check = await decryptBundle(enc, p1);
     if(check.pdf !== bundle.pdf) throw new Error('vérification échouée, recommence.');
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([enc], {type: 'application/octet-stream'}));
-    a.download = 'formulaire.enc'; document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+    download(new Blob([enc], {type: 'application/octet-stream'}), 'formulaire.enc');
     $('admPwd1').value = ''; $('admPwd2').value = '';
     log('🔒 formulaire.enc créé et vérifié (' + sites.length + ' sites). Mets CE fichier sur GitHub, jamais le PDF.');
   }catch(e){ log('⛔ Admin : ' + e.message); alert('Erreur : ' + e.message); }
@@ -680,12 +924,15 @@ function collect(){
   if(!$('cPortail').checked && !$('cPortillon').checked && !$('cChateau').checked) errs.push('nature de l\'intervention');
   if(errs.length) throw new Error('Manque : ' + errs.join(', '));
   const dt = parseIso(date), now = new Date();
-  const m = site.match(/\b\d{5}\s+(.+)$/);
+  const sp = siteParts(site);
+  const m = sp ? null : site.match(/\b(\d{5})\s+(.+)$/);
   const days = Math.round((dt - addDays(0)) / 864e5);
   let courrierTxt = '';
   if($('courrier').value){ const c = parseIso($('courrier').value); courrierTxt = pad(c.getDate())+'/'+pad(c.getMonth()+1)+'/'+c.getFullYear(); }
   return {
-    site, siteCode: site.split(' ')[0], city: m ? m[1].trim() : '',
+    site,
+    siteCode: sp ? sp.code : (m ? m[1] : site.split(' ')[0]),
+    city: sp ? sp.name : (m ? m[2].trim() : ''),
     dateTxt: dt.getDate()+'/'+(dt.getMonth()+1)+'/'+dt.getFullYear()+' '+heure,
     dateMail: pad(dt.getDate())+'/'+pad(dt.getMonth()+1)+'/'+dt.getFullYear(),
     heure, year: dt.getFullYear(), urgent: days < 10,
@@ -715,7 +962,7 @@ async function fillTemplate(d, sig){
       else if(f instanceof PDFDropdown){
         const val = clean(v);
         if(!val){ f.clear(); return; }
-        if(!f.getOptions().includes(val)) f.enableEditing();
+ if(!f.getOptions().includes(val)) f.enableEditing();
         f.select(val);
       }
       else if(f instanceof PDFOptionList){ if(f.getOptions().includes(v)) f.select(v); }
@@ -752,15 +999,12 @@ async function fillTemplate(d, sig){
 }
 
 /* ---------- génération ---------- */
-function download(blob, name){
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 30000);
-}
 function openMail(d, fileName, win){
-  const subject = 'Demande d\'ouverture - ' + d.siteCode + ' ' + d.city + ' - ' + d.dateMail + ' ' + d.heure + (d.urgent ? ' - URGENT' : '');
+  /* Objet : code du site en premier */
+  const subject = d.siteCode + (d.city ? ' ' + d.city : '') + ' - Demande d\'ouverture - ' + d.dateMail + ' ' + d.heure + (d.urgent ? ' - URGENT' : '');
   const acces = [d.portail && 'ouverture portail', d.portillon && 'accès baie par portillon', d.chateau && 'ouverture château d\'eau'].filter(Boolean).join(', ');
-  const body = [
+  /* Pas de « Cordialement » ni de nom : la signature Outlook s'ajoute d'elle-même */
+  const lines = [
     'Bonjour,', '',
     'Veuillez trouver ci-joint notre demande d\'ouverture pour le site :', d.site, '',
     'Date et heure : ' + d.dateMail + ' à ' + d.heure + (d.duree ? ' (durée : ' + d.duree + ')' : ''),
@@ -770,20 +1014,21 @@ function openMail(d, fileName, win){
     ...d.pres.map(p => '- ' + p.n + ' (' + p.s + ')'),
     d.plaque ? 'Véhicule(s) : ' + d.plaque : '',
     d.telPb ? 'Contact sur site : ' + d.telPb : '',
-    '', 'Pièce jointe : ' + fileName,
-    '', 'Cordialement,', d.signer
-  ].filter((l, i, a) => l !== '' || a[i-1] !== '').join('\r\n');
-  const withCc = $('cc').checked && MAIL_CC;
+    '', 'Pièce jointe : ' + fileName
+  ].filter((l, i, a) => l !== '' || a[i-1] !== '');
+  const body = lines.join('\r\n') + '\r\n';
+  const ccList = ccAddresses();
   if($('mailApp').value === 'web'){
     let url = OWA_COMPOSE + '?to=' + encodeURIComponent(MAIL_TO) + '&subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body.replace(/\r\n/g, '\n'));
-    if(withCc) url += '&cc=' + encodeURIComponent(MAIL_CC);
+    if(ccList.length) url += '&cc=' + encodeURIComponent(ccList.join(CC_SEP));
     if(win && !win.closed) win.location.href = url;
     else if(!window.open(url, '_blank')) throw new Error('Fenêtre Outlook bloquée par le navigateur : autorise les fenêtres pop-up pour ce site.');
-    return;
+  } else {
+    let url = 'mailto:' + MAIL_TO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    if(ccList.length) url += '&cc=' + ccList.join(CC_SEP);
+    const a = document.createElement('a'); a.href = url; document.body.appendChild(a); a.click(); a.remove();
   }
-  let url = 'mailto:' + MAIL_TO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-  if(withCc) url += '&cc=' + MAIL_CC;
-  const a = document.createElement('a'); a.href = url; document.body.appendChild(a); a.click(); a.remove();
+  return ccList;
 }
 async function generate(withMail){
   const btns = [$('genPdf'), $('genMail')]; btns.forEach(b => b.disabled = true);
@@ -804,7 +1049,10 @@ async function generate(withMail){
     download(new Blob([bytes], {type: 'application/pdf'}), fileName);
     pushHist('resp', d.resp); pushHist('plaque', d.plaque); pushHist('tel', d.telPb);
     log('✅ PDF officiel rempli : ' + fileName);
-    if(withMail){ openMail(d, fileName, win); log('✉️ Mail préparé' + (MAIL_TO ? ' vers ' + MAIL_TO : '') + ($('cc').checked && MAIL_CC ? ' (cc ' + MAIL_CC + ')' : '') + ' : glisse le PDF dedans.'); }
+    if(withMail){
+      const ccList = openMail(d, fileName, win);
+      log('✉️ Mail préparé' + (MAIL_TO ? ' vers ' + MAIL_TO : '') + (ccList.length ? ' (cc ' + ccList.join(', ') + ')' : '') + ' : glisse le PDF dedans.');
+    }
     msg('✅ ' + fileName, 'var(--ok)');
   }catch(e){
     if(win && !win.closed) try{ win.close(); }catch(_){}
