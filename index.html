@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>DAS Vendée Eau v1.4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Herr+Von+Muellerhoff&family=Mrs+Saint+Delafield&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<style>
+  :root{--c:#0a8fd0;--c2:#076a9b;--bg:#f2f6f9;--bd:#d5dee6;--ok:#2e9d4f;--warn:#e08a00;--err:#d33}
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.4 system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:#1d2933}
+  .wrap{max-width:860px;margin:0 auto;padding:16px}
+  header{display:flex;align-items:center;justify-content:space-between;background:var(--c);color:#fff;padding:12px 16px;border-radius:10px 10px 0 0}
+  header h1{margin:0;font-size:18px}
+  header small{opacity:.85}
+  .card{background:#fff;border:1px solid var(--bd);border-top:none;padding:14px 16px}
+  .card:last-of-type{border-radius:0 0 10px 10px}
+  h2{margin:0 0 10px;font-size:14px;color:var(--c2);text-transform:uppercase;letter-spacing:.03em}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+  .full{grid-column:1/-1}
+  label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:#53636f}
+  input[type=text],input[type=date],select,textarea{font:inherit;padding:7px 8px;border:1px solid var(--bd);border-radius:6px;background:#fff;color:#1d2933;width:100%}
+  textarea{min-height:52px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--c);outline-offset:-1px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .chk{display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
+  button,.btn{font:inherit;border:1px solid var(--bd);background:#fff;border-radius:6px;padding:6px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;color:#1d2933}
+  button:hover,.btn:hover{border-color:var(--c)}
+  button.main{background:var(--c);color:#fff;border-color:var(--c);font-weight:600;padding:9px 14px}
+  button.main:hover{background:var(--c2)}
+  button.sm{padding:3px 8px;font-size:12px}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .people{display:flex;flex-direction:column;gap:4px;margin-bottom:6px}
+  .person{display:flex;align-items:center;gap:8px;padding:4px 6px;border:1px solid var(--bd);border-radius:6px}
+  .person span{flex:1}
+  .person button{border:none;color:#999;padding:0 6px;font-size:16px}
+  .person button:hover{color:var(--err)}
+  .warn{display:none;margin-top:8px;padding:7px 10px;border-radius:6px;background:#fff4e0;color:#8a5300;border:1px solid #f3cf8f;font-size:13px}
+  .sigbox{background:#fff repeating-linear-gradient(0deg,#fff 0 27px,#eef3f7 27px 28px);border:1px dashed var(--bd);border-radius:6px;padding:6px;text-align:center}
+  #sigCanvas{max-width:100%;height:auto;max-height:110px}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  #msg{font-size:13px;font-weight:600}
+  #tplStatus{font-size:13px;padding:8px 10px;border-radius:6px;background:#eef5fb;margin-bottom:8px}
+  #tplStatus.ok{background:#e8f6ec;color:#1f6b36}
+  #tplStatus.err{background:#fdeaea;color:#9b1c1c}
+  #jsWarn{background:#d33;color:#fff;padding:12px 16px;border-radius:8px;margin-bottom:10px;font-weight:600}
+  #log{font:12px/1.45 Consolas,monospace;background:#0f1a22;color:#cfe3f1;border-radius:6px;padding:8px;max-height:180px;overflow:auto;white-space:pre-wrap}
+  .muted{color:#7a8a96;font-size:12px}
+  .hidden{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="jsWarn">⛔ Les scripts de la page ne se sont pas lancés. Le code a sans doute été copié depuis l'aperçu (version modifiée par Cloudflare). Recolle le code d'origine dans index.html.</div>
+
+  <header><h1>💧 DAS Vendée Eau</h1><small>v1.4</small></header>
+
+  <div class="card">
+    <h2>Formulaire officiel</h2>
+    <div id="tplStatus">⏳ Chargement…</div>
+    <div class="row">
+      <button id="tplReload" class="sm">🔄 Recharger formulaire.pdf</button>
+      <label class="btn sm hidden" id="tplPick">📂 Choisir le PDF à la main<input type="file" id="tplFile" accept="application/pdf,.pdf" hidden></label>
+      <button id="tplFields" class="sm">🔍 Lister les champs</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Préréglage</h2>
+    <div class="row">
+      <select id="preset" style="max-width:260px"><option value="">— préréglage —</option></select>
+      <button id="pSave" title="Enregistrer le préréglage">💾</button>
+      <button id="pRename" title="Renommer">🏷</button>
+      <button id="pDel" title="Supprimer">🗑</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Intervention</h2>
+    <div class="grid">
+      <label class="f full">Réservoir / site
+ <select id="site"></select>
+      </label>
+      <label class="f">Date
+        <input type="date" id="date">
+      </label>
+      <label class="f">Heure d'ouverture
+ <select id="heure"></select>
+      </label>
+      <label class="f">Durée
+        <input type="text" id="duree" list="dlDuree" placeholder="2h">
+      </label>
+      <div class="row" style="align-self:end">
+        <button class="sm" id="dToday">Aujourd'hui</button>
+ <button class="sm" id="dTomorrow">Demain</button>
+ <button class="sm" id="d10">+10 j</button>
+      </div>
+      <label class="f full">Objet de la demande
+        <textarea id="objet"></textarea>
+      </label>
+      <div class="full">
+        <div class="muted">Nature de l'intervention</div>
+        <div class="row" style="gap:16px;margin-top:4px">
+          <label class="chk"><input type="checkbox" id="cPortail"> Ouverture portail</label>
+   <label class="chk"><input type="checkbox" id="cPortillon"> Accès baie par portillon</label>
+          <label class="chk"><input type="checkbox" id="cChateau"> Ouverture château d'eau</label>
+        </div>
+      </div>
+      <label class="f">Date courrier d'accord (si travaux)
+        <input type="date" id="courrier">
+      </label>
+      <label class="f">Tél. intervenant en cas de problème
+        <input type="text" id="telPb" list="dlTel">
+      </label>
+    </div>
+    <div class="warn" id="warn"></div>
+  </div>
+
+  <div class="card">
+    <h2>Demandeur et intervenants</h2>
+    <div class="grid">
+      <label class="f">Opérateur demandeur
+        <input type="text" id="op" value="FREE">
+      </label>
+      <label class="f">Entreprise intervenante
+        <input type="text" id="ent" value="FREE">
+      </label>
+      <label class="f full">Responsable (nom, mail, tél.)
+ <input type="text" id="resp" list="dlResp">
+      </label>
+      <div class="full">
+        <div class="muted" style="margin-bottom:4px">Intervenants (cocher les présents)</div>
+        <div class="people" id="people"></div>
+        <div class="row">
+          <input type="text" id="pName" placeholder="NOM Prénom" style="flex:2;min-width:160px">
+          <input type="text" id="pSoc" placeholder="Société" value="FREE" style="flex:1;min-width:90px">
+   <button id="pAdd">＋ Ajouter</button>
+        </div>
+      </div>
+      <label class="f full">Immatriculation(s) du/des véhicule(s)
+        <input type="text" id="plaque" list="dlPlaque">
+      </label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Signature</h2>
+    <div class="grid">
+      <label class="chk full"><input type="checkbox" id="sigOn" checked> Ajouter une signature générée à partir du nom</label>
+      <label class="f">Signataire
+ <select id="sigWho"></select>
+      </label>
+      <label class="f">Forme
+        <select id="sigStyle">
+   <option value="init">Initiale + nom</option>
+   <option value="full">Nom complet</option>
+   <option value="paraphe">Paraphe (initiales)</option>
+        </select>
+      </label>
+      <label class="f">Écriture
+        <select id="sigFont">
+   <option>Herr Von Muellerhoff</option>
+   <option>Mrs Saint Delafield</option>
+   <option>Great Vibes</option>
+          <option>Segoe Script</option>
+          <option>Ink Free</option>
+        </select>
+      </label>
+      <div class="full sigbox"><canvas id="sigCanvas" width="400" height="170"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="actions">
+      <button class="main" id="genPdf">📄 Générer le PDF</button>
+      <button class="main" id="genMail">✉️ PDF + mail</button>
+      <label class="chk"><input type="checkbox" id="cc"> Camille Dubourg en copie</label>
+      <span id="msg"></span>
+    </div>
+    <p class="muted" style="margin:8px 0 0">Le PDF est téléchargé, puis il faut le glisser dans le mail (le navigateur ne peut pas joindre de fichier tout seul).</p>
+  </div>
+
+  <div class="card">
+    <h2>Journal</h2>
+    <div id="log"></div>
+  </div>
+</div>
+
+<datalist id="dlDuree"><option>1h</option><option>2h</option><option>3h</option><option>4h</option><option>½ journée</option><option>Journée</option></datalist>
+<datalist id="dlResp"></datalist>
+<datalist id="dlTel"></datalist>
+<datalist id="dlPlaque"></datalist>
+
+<script>
+(function(){
+'use strict';
+document.getElementById('jsWarn').classList.add('hidden');
+
+const VERSION = '1.4';
+const PDF_URL = 'formulaire.pdf';    // PDF officiel vierge, à côté de index.html sur GitHub
+/* Position de la signature sur la page 2 (en points, A4 = 595 x 842, mesuré depuis le HAUT) */
+const SIG_X = 95, SIG_TOP = 755, SIG_MAXW = 220, SIG_MAXH = 60;
+
+const $ = id => document.getElementById(id);
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+};
+const K_PRESETS='vde.presets.v1', K_LAST='vde.last.v1', K_PEOPLE='vde.people.v1', K_HIST='vde.hist.v1';
+
+const SITES = [
+"85006_001 Rue du château d'eau 85220 APREMONT",
+"85011_002 153 rue de L'Estacade 85630 BARBATRE",
+"85019_003 Chateau d eau 85170 BELLEVILLE-SUR-VIE",
+"85031_001 Rue Eugene CHARRIER 85510 LE BOUPERE",
+"85035_001 Fief du Moulin 85470 BRETIGNOLLES SUR MER",
+"85061_004 La Choletière 85320 CHATEAU-GUIBERT",
+"85065_003 LE CHAMP DU BORDAGE 85250 CHAVAGNES-EN-PAILLERS",
+"85089_001 Route du Cht d eau - La Borderie - 85280 LA FERRIERE",
+"85104_001 Bel Air 85580 GRUES",
+"85113_001 PORT JOINVILLE 85350 L ILE D YEU",
+"85116_002 ROUTE DU MOULIN DE MORICQ 85750 ANGLES",
+"85127_002 Moulin de la Raisiniere Les Violettes 85560 LONGEVILLE SUR MER",
+"85151_001 Chateau d eau, rue de l industrie 85290 MORTAGNE SUR SEVRE",
+"85163_001 LIEU DIT LA HOUSSINIERE 85330 NOIRMOUTIER-EN-L'ILE",
+"85164_004 Rue du château d'eau 85690 NOTRE DAME DE MONTS",
+"85206_001 Rue Raoul 85540 SAINT CYR EN TALMONDAIS",
+"85221_001 Fief de la Cathuziere 85230 SAINT GERVAIS",
+"85226_003 Les Vases 85270 ST-HILAIRE DE RIEZ",
+"85226_010 Rue de l'Atlantique 85270 SAINT HILAIRE DE RIEZ",
+"85234_001 LIEU DIT LA FORET 85160 SAINT JEAN DE MONTS",
+"85238_001 Le Champ de Chaussac 85290 SAINT-LAURENT-SUR-SEVRE",
+"85284_006 Route de Challans 85300 SOULLANS"
+];
+/* Site public : aucun nom / téléphone / plaque en dur. Chacun les ajoute et les garde dans son navigateur. */
+const MAIL_TO = 'ouverture.site@vendee-eau.fr', MAIL_CC = 'camille.dubourg@vendee-eau.fr';
+
+/* ---------- utilitaires ---------- */
+const pad = n => String(n).padStart(2,'0');
+const isoDate = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const addDays = n => { const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+n); return d; };
+const parseIso = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const tc = s => String(s||'').toLowerCase().replace(/(^|[\s\-'’])(\p{L})/gu, (m,a,b) => a + b.toUpperCase());
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const clean = s => String(s ?? '').replace(/\u00A0/g,' ').replace(/[^\x20-\x7E\u00A0-\u00FF\u2018\u2019\u201C\u201D\u2013\u2014\u2026\u20AC\u0152\u0153\u2022]/g, '?');
+function log(t){
+  const el = $('log'); const d = new Date();
+  el.textContent += '['+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())+'] '+t+'\n';
+  el.scrollTop = el.scrollHeight;
+}
+function msg(t, color){ const m = $('msg'); m.textContent = t; m.style.color = color || ''; }
+window.addEventListener('error', e => log('❌ Erreur : ' + e.message));
+window.addEventListener('unhandledrejection', e => log('❌ Erreur : ' + (e.reason && e.reason.message || e.reason)));
+
+/* ---------- listes ---------- */
+$('site').innerHTML = SITES.map(s => '<option>'+esc(s)+'</option>').join('');
+{
+  const o = [];
+  for(let h = 6; h <= 20; h++) for(const m of [0,15,30,45]){ if(h === 20 && m) break; o.push(pad(h)+':'+pad(m)); }
+  $('heure').innerHTML = o.map(x => '<option>'+x+'</option>').join('');
+}
+
+let people = LS.get(K_PEOPLE, []);
+let checked = new Set();
+let hist = Object.assign({resp:[], plaque:[], tel:[]}, LS.get(K_HIST, {}));
+
+function renderHist(){
+  const fill = (id, arr) => { $(id).innerHTML = (arr||[]).map(v => '<option value="'+esc(v)+'"></option>').join(''); };
+  fill('dlResp', hist.resp); fill('dlTel', hist.tel); fill('dlPlaque', hist.plaque);
+}
+function pushHist(key, val){
+  val = String(val||'').trim(); if(!val) return;
+  hist[key] = [val].concat((hist[key]||[]).filter(v => v !== val)).slice(0, 15);
+  LS.set(K_HIST, hist); renderHist();
+}
+
+function renderPeople(){
+  const box = $('people'); box.innerHTML = '';
+  if(!people.length){ box.innerHTML = '<div class="muted">Aucun intervenant : ajoute-toi ci-dessous (puis 💾 pour le garder dans un préréglage).</div>'; }
+  people.forEach((p, i) => {
+    const row = document.createElement('label'); row.className = 'person';
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = checked.has(p.n);
+    cb.onchange = () => { cb.checked ? checked.add(p.n) : checked.delete(p.n); refreshSigWho(); saveLast(); };
+    const sp = document.createElement('span'); sp.textContent = p.n + ' / ' + p.s;
+    const del = document.createElement('button'); del.textContent = '×'; del.title = 'Retirer de la liste';
+    del.onclick = e => { e.preventDefault(); if(!confirm('Retirer '+p.n+' de la liste ?')) return;
+      people.splice(i,1); checked.delete(p.n); LS.set(K_PEOPLE, people); renderPeople(); refreshSigWho(); saveLast(); };
+    row.append(cb, sp, del); box.appendChild(row);
+  });
+}
+$('pAdd').onclick = () => {
+  const n = $('pName').value.trim().toUpperCase(), s = ($('pSoc').value.trim() || 'FREE').toUpperCase();
+  if(!n) return;
+  if(!people.some(p => p.n === n)) people.push({n, s});
+  checked.add(n); LS.set(K_PEOPLE, people);
+  $('pName').value = ''; renderPeople(); refreshSigWho(); saveLast();
+  log('Intervenant ajouté : '+n+' / '+s);
+};
+$('pName').addEventListener('keydown', e => { if(e.key === 'Enter') $('pAdd').click(); });
+
+function refreshSigWho(){
+  const sel = $('sigWho'), cur = sel.value;
+  const list = people.filter(p => checked.has(p.n));
+  const src = list.length ? list : people;
+  sel.innerHTML = src.map(p => '<option>'+esc(p.n)+'</option>').join('');
+  if(src.some(p => p.n === cur)) sel.value = cur;
+  renderSig();
+}
+
+/* ---------- dates ---------- */
+function setDate(n){ $('date').value = isoDate(addDays(n)); checkDate(); saveLast(); }
+$('dToday').onclick = () => setDate(0);
+$('dTomorrow').onclick = () => setDate(1);
+$('d10').onclick = () => setDate(10);
+function checkDate(){
+  const w = $('warn'), v = $('date').value;
+  if(!v){ w.style.display = 'none'; return; }
+  const days = Math.round((parseIso(v) - addDays(0)) / 864e5);
+  if(days < 0){ w.textContent = '⛔ La date est déjà passée.'; w.style.display = 'block'; }
+  else if(days < 10){ w.textContent = '⚠ Moins de 10 jours avant l\'intervention ('+days+' j) : la demande sera marquée URGENT dans l\'objet du mail.'; w.style.display = 'block'; }
+  else w.style.display = 'none';
+}
+$('date').addEventListener('change', checkDate);
+
+/* ---------- état / préréglages ---------- */
+const FIELDS = ['site','heure','duree','objet','cPortail','cPortillon','cChateau','telPb','op','ent','resp','plaque','sigOn','sigWho','sigStyle','sigFont','cc'];
+function getState(){
+  const s = {};
+  FIELDS.forEach(id => { const el = $(id); s[id] = el.type === 'checkbox' ? el.checked : el.value; });
+  s.checked = [...checked];
+  return s;
+}
+function applyState(s){
+  if(!s) return;
+  checked = new Set(s.checked || []);
+  renderPeople(); refreshSigWho();
+  FIELDS.forEach(id => { if(!(id in s)) return; const el = $(id);
+    if(el.type === 'checkbox') el.checked = !!s[id]; else el.value = s[id]; });
+  if(!$('site').value) $('site').value = SITES[4];
+  if(!$('heure').value) $('heure').value = '09:00';
+  renderSig();
+}
+function saveLast(){ LS.set(K_LAST, getState()); }
+document.addEventListener('input', e => { if(e.target.closest('.card')) saveLast(); });
+document.addEventListener('change', e => { if(e.target.closest('.card')) saveLast(); });
+
+function renderPresets(sel){
+  const ps = LS.get(K_PRESETS, {});
+  $('preset').innerHTML = '<option value="">— préréglage —</option>' +
+    Object.keys(ps).sort().map(n => '<option>'+esc(n)+'</option>').join('');
+  if(sel) $('preset').value = sel;
+}
+$('preset').onchange = () => {
+  const n = $('preset').value; if(!n) return;
+  applyState(LS.get(K_PRESETS, {})[n]); saveLast(); log('Préréglage chargé : '+n);
+};
+$('pSave').onclick = () => {
+  const n = (prompt('Nom du préréglage :', $('preset').value || '') || '').trim(); if(!n) return;
+  const ps = LS.get(K_PRESETS, {}); ps[n] = getState(); LS.set(K_PRESETS, ps); renderPresets(n);
+  log('Préréglage enregistré : '+n);
+};
+$('pRename').onclick = () => {
+  const old = $('preset').value; if(!old) return;
+  const n = (prompt('Nouveau nom :', old) || '').trim(); if(!n || n === old) return;
+  const ps = LS.get(K_PRESETS, {}); ps[n] = ps[old]; delete ps[old]; LS.set(K_PRESETS, ps); renderPresets(n);
+  log('Préréglage renommé : '+old+' → '+n);
+};
+$('pDel').onclick = () => {
+  const n = $('preset').value; if(!n || !confirm('Supprimer le préréglage « '+n+' » ?')) return;
+  const ps = LS.get(K_PRESETS, {}); delete ps[n]; LS.set(K_PRESETS, ps); renderPresets();
+  log('Préréglage supprimé : '+n);
+};
+
+/* ---------- signature ---------- */
+function hash(s){ let h = 2166136261; for(const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; }
+function rnd(seed){ return () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; }; }
+function sigText(name, style){
+  const w = tc(name).split(/\s+/).filter(Boolean); if(!w.length) return '';
+  if(style === 'paraphe') return w.map(x => x[0]).join('');
+  if(style === 'init' && w.length > 1) return w[0][0] + '. ' + w.slice(1).join(' ');
+  return w.join(' ');
+}
+let sigSeq = 0;
+async function renderSig(){
+  const my = ++sigSeq;
+  const c = $('sigCanvas'), fam = $('sigFont').value;
+  const text = sigText($('sigWho').value, $('sigStyle').value);
+  try{ await document.fonts.load('72px "'+fam+'"', text || 'A'); }catch(e){}
+  if(my !== sigSeq) return c.toDataURL('image/png');
+  const size = 72, font = size+'px "'+fam+'", "Segoe Script", "Ink Free", "Brush Script MT", cursive';
+  let g = c.getContext('2d'); g.font = font;
+  const tw = Math.ceil(g.measureText(text).width);
+  c.width = Math.max(220, tw + 110); c.height = 170;
+  g = c.getContext('2d'); g.clearRect(0, 0, c.width, c.height);
+  if(!text) return null;
+  const r = rnd(hash(text + fam));
+  g.font = font; g.fillStyle = '#1b2a5a'; g.textBaseline = 'alphabetic';
+  g.save(); g.translate(30, 108); g.rotate(-0.03 - r()*0.04); g.fillText(text, 0, 0); g.restore();
+  g.strokeStyle = '#1b2a5a'; g.lineWidth = 2.2; g.lineCap = 'round';
+  const y0 = 128 + r()*8;
+  g.beginPath(); g.moveTo(18, y0 + 6);
+  g.bezierCurveTo(c.width*0.3, y0 - 8 - r()*10, c.width*0.62, y0 + 14, c.width - 14, y0 - 16 - r()*12);
+  g.stroke();
+  return c.toDataURL('image/png');
+}
+['sigWho','sigStyle','sigFont'].forEach(id => $(id).addEventListener('change', renderSig));
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(renderSig);
+window.addEventListener('load', renderSig);
+
+/* ---------- pdf-lib (avec adresses de secours) ---------- */
+function loadScript(src){ return new Promise((ok, ko) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ko; document.head.appendChild(s); }); }
+async function ensurePdfLib(){
+  if(window.PDFLib) return window.PDFLib;
+  for(const src of ['https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js']){
+    try{ await loadScript(src); }catch(e){}
+    if(window.PDFLib){ log('pdf-lib chargé depuis l\'adresse de secours.'); return window.PDFLib; }
+  }
+  throw new Error('Impossible de charger pdf-lib (outil PDF). Vérifie la connexion internet.');
+}
+
+/* ---------- formulaire officiel ---------- */
+let TPL = null;
+function tplStatus(html, cls){ const s = $('tplStatus'); s.innerHTML = html; s.className = cls || ''; }
+async function useTemplate(bytes, label){
+  const PDFLib = await ensurePdfLib();
+  const pdf = await PDFLib.PDFDocument.load(bytes.slice(), {ignoreEncryption: true});
+  const form = pdf.getForm(); const fields = form.getFields();
+  if(!fields.length) throw new Error(label + ' ne contient aucun champ de formulaire.');
+  TPL = bytes;
+  /* Si le PDF contient des listes déroulantes remplies, on les reprend comme suggestions */
+  const opts = n => { try{ const f = form.getField(n); return f.getOptions ? f.getOptions() : []; }catch(e){ return []; } };
+  opts('Liste déroulante3').forEach(v => pushHist('resp', v));
+  opts('Liste déroulante6').forEach(v => pushHist('plaque', v));
+  opts('Liste déroulante7').forEach(v => pushHist('tel', v));
+  let added = 0;
+  opts('Liste déroulante5').forEach(v => v.split('+').forEach(part => {
+    const [n, s] = part.split('/').map(x => (x||'').trim().toUpperCase());
+    if(n && !people.some(p => p.n === n)){ people.push({n, s: s || 'FREE'}); added++; }
+  }));
+  if(added){ LS.set(K_PEOPLE, people); renderPeople(); refreshSigWho(); }
+  tplStatus('🟩 <b>Formulaire officiel prêt</b> (' + esc(label) + ', ' + fields.length + ' champs).', 'ok');
+  $('tplPick').classList.add('hidden');
+  log('Formulaire officiel chargé : ' + label + ' (' + fields.length + ' champs' + (added ? ', ' + added + ' intervenant(s) repris des listes' : '') + ').');
+}
+async function loadOfficial(){
+  TPL = null;
+  tplStatus('⏳ Chargement de formulaire.pdf…');
+  try{
+    let r;
+    try{ r = await fetch(PDF_URL + '?v=' + Date.now(), {cache: 'no-store'}); }
+    catch(e){ throw new Error('lecture impossible (page ouverte depuis le disque ? Utilise le lien GitHub).'); }
+    if(!r.ok) throw new Error('formulaire.pdf introuvable sur le site (erreur ' + r.status + '). Vérifie le nom exact du fichier sur GitHub.');
+    const bytes = new Uint8Array(await r.arrayBuffer());
+    if(String.fromCharCode(...bytes.slice(0, 5)) !== '%PDF-') throw new Error('formulaire.pdf n\'est pas un vrai PDF.');
+    await useTemplate(bytes, 'formulaire.pdf');
+  }catch(e){
+    tplStatus('🟥 <b>Formulaire officiel non chargé</b> : ' + esc(e.message), 'err');
+    $('tplPick').classList.remove('hidden');
+    log('❌ ' + e.message);
+  }
+}
+$('tplReload').onclick = loadOfficial;
+$('tplFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if(!f) return;
+  try{ await useTemplate(new Uint8Array(await f.arrayBuffer()), f.name); }
+  catch(err){ tplStatus('🟥 ' + esc(err.message), 'err'); log('❌ ' + err.message); }
+});
+$('tplFields').onclick = async () => {
+  if(!TPL){ log('Aucun formulaire chargé.'); return; }
+  const PDFLib = await ensurePdfLib();
+  const pdf = await PDFLib.PDFDocument.load(TPL.slice(), {ignoreEncryption: true});
+  log('Champs du formulaire :\n  ' + pdf.getForm().getFields().map(f => f.getName() + ' (' + f.constructor.name.replace('PDF','') + ')').join('\n  '));
+};
+
+/* ---------- collecte ---------- */
+function collect(){
+  const site = $('site').value, date = $('date').value, heure = $('heure').value;
+  const pres = people.filter(p => checked.has(p.n));
+  const errs = [];
+  if(!site) errs.push('site');
+  if(!date) errs.push('date');
+  if(!pres.length) errs.push('au moins un intervenant coché');
+  if(!$('cPortail').checked && !$('cPortillon').checked && !$('cChateau').checked) errs.push('nature de l\'intervention');
+  if(errs.length) throw new Error('Manque : ' + errs.join(', '));
+  const dt = parseIso(date), now = new Date();
+  const m = site.match(/\b\d{5}\s+(.+)$/);
+  const days = Math.round((dt - addDays(0)) / 864e5);
+  let courrierTxt = '';
+  if($('courrier').value){ const c = parseIso($('courrier').value); courrierTxt = pad(c.getDate())+'/'+pad(c.getMonth()+1)+'/'+c.getFullYear(); }
+  return {
+    site, siteCode: site.split(' ')[0], city: m ? m[1].trim() : '',
+    dateTxt: dt.getDate()+'/'+(dt.getMonth()+1)+'/'+dt.getFullYear()+' '+heure,
+    dateMail: pad(dt.getDate())+'/'+pad(dt.getMonth()+1)+'/'+dt.getFullYear(),
+    heure, year: dt.getFullYear(), urgent: days < 10,
+    duree: $('duree').value.trim(), objet: $('objet').value.trim(),
+    portail: $('cPortail').checked, portillon: $('cPortillon').checked, chateau: $('cChateau').checked,
+    courrierTxt, telPb: $('telPb').value.trim(),
+    op: $('op').value.trim(), ent: $('ent').value.trim(), resp: $('resp').value.trim(),
+    pres, interv: pres.map(p => p.n+'/'+p.s).join(' + '),
+    plaque: $('plaque').value.trim(),
+    today: now.getDate()+'/'+(now.getMonth()+1)+'/'+String(now.getFullYear()).slice(2),
+    signer: tc($('sigWho').value)
+  };
+}
+
+/* ---------- remplissage du PDF officiel ---------- */
+async function fillTemplate(d, sig){
+  const {PDFDocument, StandardFonts, PDFTextField, PDFDropdown, PDFCheckBox, PDFOptionList} = PDFLib;
+  const pdf = await PDFDocument.load(TPL.slice(), {ignoreEncryption: true});
+  const form = pdf.getForm();
+  const font = await pdf.embedFont(StandardFonts.Helvetica);
+  const names = form.getFields().map(f => f.getName());
+  const set = (n, v) => {
+    let f; try{ f = form.getField(n); }catch(e){ f = null; }
+    if(!f){ log('⚠ Champ absent du PDF : ' + n); return; }
+    try{
+      if(f instanceof PDFTextField){ f.setText(clean(v)); }
+      else if(f instanceof PDFDropdown){
+        const val = clean(v);
+ if(!val){ f.clear(); return; }
+        if(!f.getOptions().includes(val)) f.enableEditing();
+        f.select(val);
+      }
+      else if(f instanceof PDFOptionList){ if(f.getOptions().includes(v)) f.select(v); }
+      else if(f instanceof PDFCheckBox){ v ? f.check() : f.uncheck(); }
+    }catch(e){ log('⚠ ' + n + ' : ' + e.message); }
+  };
+  set('Liste déroulante8', d.site);
+  set('Date17_af_date', d.dateTxt);
+  set('Liste déroulante4', d.duree);
+  set('Texte4', d.objet);
+  set('Case à cocher5', d.portail);
+  if(names.includes('Case à cocher6')) set('Case à cocher6', d.portillon);
+  else if(d.portillon) log('⚠ Case « portillon » introuvable (Case à cocher6) : utilise 🔍 Lister les champs et envoie-moi la liste.');
+  set('Case à cocher7', d.chateau);
+  set('Liste déroulante7', d.telPb);
+  set('Liste déroulante1', d.op);
+  set('Liste déroulante2', d.ent);
+  set('Liste déroulante3', d.resp);
+  set('Liste déroulante5', d.interv);
+  set('Liste déroulante6', d.plaque);
+  set('Date20_af_date', d.today);
+  const extraDate = names.find(n => /date/i.test(n) && n !== 'Date17_af_date' && n !== 'Date20_af_date');
+  if(extraDate) set(extraDate, d.courrierTxt);
+  try{ form.updateFieldAppearances(font); }catch(e){ log('⚠ Apparence des champs : ' + e.message); }
+  if(sig){
+    const pages = pdf.getPages();
+    const page = pages[1] || pages[0];
+    const img = await pdf.embedPng(sig);
+    const sc = Math.min(SIG_MAXW / img.width, SIG_MAXH / img.height);
+    const H = page.getHeight();
+    page.drawImage(img, {x: SIG_X, y: H - SIG_TOP - img.height*sc, width: img.width*sc, height: img.height*sc});
+  }
+  return pdf.save();
+}
+
+/* ---------- génération ---------- */
+function download(blob, name){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+}
+function openMail(d, fileName){
+  const subject = 'Demande d\'ouverture - ' + d.siteCode + ' ' + d.city + ' - ' + d.dateMail + ' ' + d.heure + (d.urgent ? ' - URGENT' : '');
+  const acces = [d.portail && 'ouverture portail', d.portillon && 'accès baie par portillon', d.chateau && 'ouverture château d\'eau'].filter(Boolean).join(', ');
+  const body = [
+    'Bonjour,', '',
+    'Veuillez trouver ci-joint notre demande d\'ouverture pour le site :', d.site, '',
+    'Date et heure : ' + d.dateMail + ' à ' + d.heure + (d.duree ? ' (durée : ' + d.duree + ')' : ''),
+    'Nature : ' + acces,
+    d.objet ? 'Objet : ' + d.objet : '',
+    '', 'Intervenants :',
+    ...d.pres.map(p => '- ' + p.n + ' (' + p.s + ')'),
+    d.plaque ? 'Véhicule(s) : ' + d.plaque : '',
+    d.telPb ? 'Contact sur site : ' + d.telPb : '',
+    '', 'Pièce jointe : ' + fileName,
+    '', 'Cordialement,', d.signer
+  ].filter((l, i, a) => l !== '' || a[i-1] !== '').join('\r\n');
+  let url = 'mailto:' + MAIL_TO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  if($('cc').checked) url += '&cc=' + MAIL_CC;
+  const a = document.createElement('a'); a.href = url; document.body.appendChild(a); a.click(); a.remove();
+}
+async function generate(withMail){
+  const btns = [$('genPdf'), $('genMail')]; btns.forEach(b => b.disabled = true);
+  try{
+    if(!TPL) throw new Error('Formulaire officiel non chargé (voir l\'encadré en haut).');
+    const d = collect();
+    msg('Génération…', 'var(--c2)');
+    await ensurePdfLib();
+    const sig = $('sigOn').checked ? await renderSig() : null;
+    const bytes = await fillTemplate(d, sig);
+    const fileName = ('Formulaire ouverture_' + d.year + ' ' + tc(d.city)).replace(/[\\/:*?"<>|]/g, '').trim() + '.pdf';
+    download(new Blob([bytes], {type: 'application/pdf'}), fileName);
+    pushHist('resp', d.resp); pushHist('plaque', d.plaque); pushHist('tel', d.telPb);
+    log('✅ PDF officiel rempli : ' + fileName);
+    if(withMail){ openMail(d, fileName); log('✉️ Mail préparé vers ' + MAIL_TO + ($('cc').checked ? ' (cc Camille)' : '') + ' : glisse le PDF dedans.'); }
+    msg('✅ ' + fileName, 'var(--ok)');
+  }catch(e){
+    msg('⛔ ' + e.message, 'var(--err)'); log('⛔ ' + e.message);
+  }finally{ btns.forEach(b => b.disabled = false); }
+}
+$('genPdf').onclick = () => generate(false);
+$('genMail').onclick = () => generate(true);
+
+/* ---------- démarrage ---------- */
+renderHist(); renderPresets(); renderPeople();
+const last = LS.get(K_LAST, null);
+if(last) applyState(last);
+else {
+  $('site').value = SITES[4]; $('heure').value = '09:00'; $('duree').value = '2h';
+  $('objet').value = 'ouverture château d\'eau'; $('cPortail').checked = true; $('cChateau').checked = true;
+  $('resp').value = hist.resp[0] || ''; $('plaque').value = hist.plaque[0] || ''; $('telPb').value = hist.tel[0] || '';
+  refreshSigWho();
+}
+setDate(10);
+$('courrier').value = '';
+log('DAS Vendée Eau v' + VERSION + ' : page prête (' + SITES.length + ' sites).');
+loadOfficial();
+})();
+</script>
+</body>
+</html>
