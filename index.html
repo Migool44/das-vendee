@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>DAS Vendée Eau v1.7</title>
+<title>DAS Vendée Eau v1.8</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Herr+Von+Muellerhoff&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -58,7 +58,7 @@
 <body>
 <div id="noJs" class="nojs">⛔ Les scripts de la page ne démarrent pas. Le code a sans doute été copié depuis l'aperçu (Cloudflare) : recolle-le depuis l'artifact « code » (aucun « rocket-loader » ne doit apparaître).</div>
 <div class="wrap">
-  <header><h1>💧 DAS Vendée Eau</h1><small>v1.7</small></header>
+  <header><h1>💧 DAS Vendée Eau</h1><small>v1.8</small></header>
 
   <!-- ===== Accès protégé ===== -->
   <div class="card">
@@ -285,7 +285,7 @@
 'use strict';
 document.getElementById('noJs').remove();
 
-const VERSION = '1.7';
+const VERSION = '1.8';
 const ENC_URL = 'formulaire.enc';          // fichier chiffré, à côté de index.html sur GitHub
 const MAGIC = 'VDE1', PBKDF2_ITER = 600000;
 /* Position de la signature sur la page 2 (en points, A4 = 595 x 842, mesuré depuis le HAUT) */
@@ -1013,14 +1013,15 @@ function openMail(d, fileName, win){
     '', 'Intervenants :',
     ...d.pres.map(p => '- ' + p.n + ' (' + p.s + ')'),
     d.plaque ? 'Véhicule(s) : ' + d.plaque : '',
-    d.telPb ? 'Contact sur site : ' + d.telPb : '',
-    '', 'Pièce jointe : ' + fileName
+    d.telPb ? 'Contact sur site : ' + d.telPb : ''
   ].filter((l, i, a) => l !== '' || a[i-1] !== '');
   const body = lines.join('\r\n') + '\r\n';
   const ccList = ccAddresses();
   if($('mailApp').value === 'web'){
-    let url = OWA_COMPOSE + '?to=' + encodeURIComponent(MAIL_TO) + '&subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body.replace(/\r\n/g, '\n'));
-    if(ccList.length) url += '&cc=' + encodeURIComponent(ccList.join(CC_SEP));
+    /* Outlook web ignore le paramètre &cc= : la copie est passée dans « to » sous la forme
+       destinataire?cc=a,b (astuce mailto reconnue par Outlook web) */
+    const toField = MAIL_TO + (ccList.length ? '?cc=' + ccList.join(',') : '');
+    const url = OWA_COMPOSE + '?to=' + encodeURIComponent(toField) + '&subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body.replace(/\r\n/g, '\n'));
     if(win && !win.closed) win.location.href = url;
     else if(!window.open(url, '_blank')) throw new Error('Fenêtre Outlook bloquée par le navigateur : autorise les fenêtres pop-up pour ce site.');
   } else {
@@ -1034,6 +1035,13 @@ async function generate(withMail){
   const btns = [$('genPdf'), $('genMail')]; btns.forEach(b => b.disabled = true);
   /* Outlook web : on ouvre l'onglet tout de suite (sinon le navigateur le bloque après la génération) */
   let win = null;
+  /* Secours : les adresses en copie sont mises dans le presse-papiers (Ctrl+V dans « Cc » si Outlook ne les a pas reprises) */
+  if(withMail){
+    const ccNow = ccAddresses();
+    if(ccNow.length && navigator.clipboard) navigator.clipboard.writeText(ccNow.join('; ')).then(
+      () => log('📋 Adresses en copie mises dans le presse-papiers : si le champ Cc est vide dans Outlook, clique dedans et fais Ctrl+V.'),
+      () => {});
+  }
   if(withMail && $('mailApp').value === 'web'){
     win = window.open('', '_blank');
     if(win) try{ win.document.title = 'Outlook…'; win.document.body.innerHTML = '<p style="font:16px system-ui;padding:20px">⏳ Préparation du mail Outlook…</p>'; }catch(e){}
