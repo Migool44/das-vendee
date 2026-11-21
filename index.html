@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>DAS Vendée Eau v1.5</title>
+<title>DAS Vendée Eau v1.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Herr+Von+Muellerhoff&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -57,7 +57,7 @@
 <body>
 <div id="noJs" class="nojs">⛔ Les scripts de la page ne démarrent pas. Le code a sans doute été copié depuis l'aperçu (Cloudflare) : recolle-le depuis l'artifact « code » (aucun « rocket-loader » ne doit apparaître).</div>
 <div class="wrap">
-  <header><h1>💧 DAS Vendée Eau</h1><small>v1.5</small></header>
+  <header><h1>💧 DAS Vendée Eau</h1><small>v1.6</small></header>
 
   <!-- ===== Accès protégé ===== -->
   <div class="card">
@@ -183,9 +183,15 @@
         <button class="main" id="genPdf">📄 Générer le PDF</button>
  <button class="main" id="genMail">✉️ PDF + mail</button>
  <label class="chk"><input type="checkbox" id="cc"> <span id="ccLabel">Copie (cc)</span></label>
-        <span id="msg"></span>
+        <label class="chk">Messagerie :
+   <select id="mailApp" style="width:auto">
+     <option value="web">Outlook web</option>
+     <option value="pc">Outlook PC (application)</option>
+          </select>
+        </label>
+ <span id="msg"></span>
       </div>
-      <p class="muted" style="margin:8px 0 0">Le PDF est téléchargé, puis il faut le glisser dans le mail (le navigateur ne peut pas joindre de fichier tout seul).</p>
+      <p class="muted" style="margin:8px 0 0">Le PDF est téléchargé, puis il faut le glisser dans le mail (ni le navigateur ni Outlook web ne peuvent joindre un fichier tout seuls).</p>
     </div>
   </div>
 
@@ -237,11 +243,13 @@
 'use strict';
 document.getElementById('noJs').remove();
 
-const VERSION = '1.5';
+const VERSION = '1.6';
 const ENC_URL = 'formulaire.enc';          // fichier chiffré, à côté de index.html sur GitHub
 const MAGIC = 'VDE1', PBKDF2_ITER = 600000;
 /* Position de la signature sur la page 2 (en points, A4 = 595 x 842, mesuré depuis le HAUT) */
-const SIG_X = 95, SIG_TOP = 755, SIG_MAXW = 220, SIG_MAXH = 60;
+const SIG_X = 95, SIG_TOP = 738, SIG_MAXW = 310, SIG_MAXH = 88;
+/* Outlook web : fenêtre de rédaction (redirige vers outlook.cloud.microsoft) */
+const OWA_COMPOSE = 'https://outlook.office.com/mail/deeplink/compose';
 
 const $ = id => document.getElementById(id);
 const LS = {
@@ -410,7 +418,7 @@ function checkDate(){
 $('date').addEventListener('change', checkDate);
 
 /* ---------- état / préréglages ---------- */
-const FIELDS = ['site','heure','duree','objet','cPortail','cPortillon','cChateau','telPb','op','ent','resp','plaque','sigOn','sigWho','sigStyle','sigFont','cc'];
+const FIELDS = ['site','heure','duree','objet','cPortail','cPortillon','cChateau','telPb','op','ent','resp','plaque','sigOn','sigWho','sigStyle','sigFont','cc','mailApp'];
 function getState(){
   const s = {};
   FIELDS.forEach(id => { const el = $(id); s[id] = el.type === 'checkbox' ? el.checked : el.value; });
@@ -749,7 +757,7 @@ function download(blob, name){
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 30000);
 }
-function openMail(d, fileName){
+function openMail(d, fileName, win){
   const subject = 'Demande d\'ouverture - ' + d.siteCode + ' ' + d.city + ' - ' + d.dateMail + ' ' + d.heure + (d.urgent ? ' - URGENT' : '');
   const acces = [d.portail && 'ouverture portail', d.portillon && 'accès baie par portillon', d.chateau && 'ouverture château d\'eau'].filter(Boolean).join(', ');
   const body = [
@@ -765,12 +773,26 @@ function openMail(d, fileName){
     '', 'Pièce jointe : ' + fileName,
     '', 'Cordialement,', d.signer
   ].filter((l, i, a) => l !== '' || a[i-1] !== '').join('\r\n');
+  const withCc = $('cc').checked && MAIL_CC;
+  if($('mailApp').value === 'web'){
+    let url = OWA_COMPOSE + '?to=' + encodeURIComponent(MAIL_TO) + '&subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body.replace(/\r\n/g, '\n'));
+    if(withCc) url += '&cc=' + encodeURIComponent(MAIL_CC);
+    if(win && !win.closed) win.location.href = url;
+    else if(!window.open(url, '_blank')) throw new Error('Fenêtre Outlook bloquée par le navigateur : autorise les fenêtres pop-up pour ce site.');
+    return;
+  }
   let url = 'mailto:' + MAIL_TO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-  if($('cc').checked && MAIL_CC) url += '&cc=' + MAIL_CC;
+  if(withCc) url += '&cc=' + MAIL_CC;
   const a = document.createElement('a'); a.href = url; document.body.appendChild(a); a.click(); a.remove();
 }
 async function generate(withMail){
   const btns = [$('genPdf'), $('genMail')]; btns.forEach(b => b.disabled = true);
+  /* Outlook web : on ouvre l'onglet tout de suite (sinon le navigateur le bloque après la génération) */
+  let win = null;
+  if(withMail && $('mailApp').value === 'web'){
+    win = window.open('', '_blank');
+    if(win) try{ win.document.title = 'Outlook…'; win.document.body.innerHTML = '<p style="font:16px system-ui;padding:20px">⏳ Préparation du mail Outlook…</p>'; }catch(e){}
+  }
   try{
     if(!TPL) throw new Error('Formulaire non déverrouillé (voir l\'encadré « Accès »).');
     const d = collect();
@@ -782,9 +804,10 @@ async function generate(withMail){
     download(new Blob([bytes], {type: 'application/pdf'}), fileName);
     pushHist('resp', d.resp); pushHist('plaque', d.plaque); pushHist('tel', d.telPb);
     log('✅ PDF officiel rempli : ' + fileName);
-    if(withMail){ openMail(d, fileName); log('✉️ Mail préparé' + (MAIL_TO ? ' vers ' + MAIL_TO : '') + ($('cc').checked && MAIL_CC ? ' (cc ' + MAIL_CC + ')' : '') + ' : glisse le PDF dedans.'); }
+    if(withMail){ openMail(d, fileName, win); log('✉️ Mail préparé' + (MAIL_TO ? ' vers ' + MAIL_TO : '') + ($('cc').checked && MAIL_CC ? ' (cc ' + MAIL_CC + ')' : '') + ' : glisse le PDF dedans.'); }
     msg('✅ ' + fileName, 'var(--ok)');
   }catch(e){
+    if(win && !win.closed) try{ win.close(); }catch(_){}
     msg('⛔ ' + e.message, 'var(--err)'); log('⛔ ' + e.message);
   }finally{ btns.forEach(b => b.disabled = false); }
 }
