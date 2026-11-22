@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#6366f1">
-<title>DAS Vendée Eau v1.10</title>
+<title>DAS Vendée Eau v1.11</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Great+Vibes&family=Herr+Von+Muellerhoff&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -172,7 +172,7 @@
   <div class="brand"><b>DAS Vendée Eau</b><small>Demande d'ouverture de réservoir</small></div>
   <span class="sp"></span>
   <span id="pill" class="pill">Démarrage…</span>
-  <span class="ver">v1.10</span>
+  <span class="ver">v1.11</span>
 </div></header>
 
 <main class="wrap">
@@ -416,7 +416,7 @@
 'use strict';
 document.getElementById('noJs').remove();
 
-const VERSION = '1.10';
+const VERSION = '1.11';
 const ENC_URL = 'formulaire.enc';          // fichier chiffré, à côté de index.html sur GitHub
 const MAGIC = 'VDE1', PBKDF2_ITER = 600000;
 /* Position de la signature sur la page 2 (en points, A4 = 595 x 842, mesuré depuis le HAUT) */
@@ -831,12 +831,16 @@ $('preset').onchange = () => {
   const n = $('preset').value;
   LS.set(K_CUR, n);
   if(!n){ setCompact(false); return; }
-  applyState(LS.get(K_PRESETS, {})[n]); saveLast(); setCompact(true);
+  /* Le site n'est jamais repris d'un préréglage (anciens préréglages compris) : on garde le site affiché */
+  const st = Object.assign({}, LS.get(K_PRESETS, {})[n] || {}); delete st.site;
+  applyState(st); saveLast(); setCompact(true);
   log('Préréglage chargé : '+n);
 };
 $('pSave').onclick = () => {
   const n = (prompt('Nom du préréglage :', $('preset').value || '') || '').trim(); if(!n) return;
-  const ps = LS.get(K_PRESETS, {}); ps[n] = getState(); LS.set(K_PRESETS, ps); renderPresets(n);
+  /* Le site sélectionné n'est pas enregistré dans le préréglage */
+  const st = getState(); delete st.site;
+  const ps = LS.get(K_PRESETS, {}); ps[n] = st; LS.set(K_PRESETS, ps); renderPresets(n);
   LS.set(K_CUR, n); setCompact(true);
   log('Préréglage enregistré : '+n);
 };
