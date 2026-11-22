@@ -4,120 +4,164 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>DAS Vendée Eau v1.9</title>
+<meta name="theme-color" content="#6366f1">
+<title>DAS Vendée Eau v1.10</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Herr+Von+Muellerhoff&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Great+Vibes&family=Herr+Von+Muellerhoff&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <style>
   :root{
-    --acc:#0284c7;--acc2:#0369a1;--acc-soft:#e0f2fe;--acc-bg:#f0f9ff;
-    --bg:#f4f6f9;--card:#fff;--bd:#e2e8f0;--bd2:#cbd5e1;--tx:#0f172a;--mut:#64748b;
-    --ok:#16a34a;--warn:#d97706;--err:#dc2626;--r:16px
+    --g:linear-gradient(135deg,#06b6d4 0%,#6366f1 52%,#d946ef 100%);
+    --acc:#6366f1;--acc2:#4f46e5;--acc-soft:rgba(99,102,241,.16);
+    --tx:#0f172a;--mut:#64748b;--bd:rgba(15,23,42,.09);--bd2:rgba(15,23,42,.18);
+    --ok:#059669;--warn:#d97706;--err:#e11d48;--r:22px
   }
   *{box-sizing:border-box}
-  body{margin:0;font:14.5px/1.5 "Segoe UI Variable","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--bg);color:var(--tx);padding-bottom:96px;-webkit-font-smoothing:antialiased}
-  .nojs{background:var(--err);color:#fff;padding:10px 14px;text-align:center;font-weight:600}
+  html{background:#f4f5fb}
+  body{margin:0;font:14.5px/1.55 "Plus Jakarta Sans","Segoe UI Variable","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:var(--tx);padding-bottom:110px;-webkit-font-smoothing:antialiased;min-height:100vh}
+  /* fond « aurore » animé */
+  body::before{content:"";position:fixed;inset:-25%;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(38% 32% at 12% 8%,rgba(34,211,238,.42),transparent 70%),
+      radial-gradient(34% 30% at 88% 12%,rgba(139,92,246,.38),transparent 70%),
+      radial-gradient(40% 34% at 75% 92%,rgba(236,72,153,.26),transparent 70%),
+      radial-gradient(36% 34% at 8% 88%,rgba(45,212,191,.32),transparent 70%);
+    filter:blur(30px);animation:drift 28s ease-in-out infinite alternate}
+  @keyframes drift{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(3%,-2%) rotate(4deg)}100%{transform:translate(-3%,2%) rotate(-3deg)}}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){body::before,.card{animation:none !important}}
+
+  .nojs{background:var(--err);color:#fff;padding:10px 14px;text-align:center;font-weight:700}
   .hidden{display:none !important}
 
   /* barre du haut */
-  .top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--bd)}
-  .top-in{max-width:780px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:10px 16px}
-  .logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#38bdf8,#0369a1);display:grid;place-items:center;font-size:19px;box-shadow:0 4px 12px rgba(3,105,161,.25)}
-  .brand b{display:block;font-size:15.5px;letter-spacing:-.01em}
+  .top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.6);backdrop-filter:blur(18px) saturate(1.6);-webkit-backdrop-filter:blur(18px) saturate(1.6);border-bottom:1px solid rgba(255,255,255,.7)}
+  .top-in{max-width:800px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:10px 16px}
+  .logo{width:40px;height:40px;border-radius:13px;background:var(--g);display:grid;place-items:center;font-size:20px;box-shadow:0 8px 20px -6px rgba(99,102,241,.6)}
+  .brand b{display:block;font-size:16px;font-weight:800;letter-spacing:-.02em}
   .brand small{display:block;color:var(--mut);font-size:12px;margin-top:-2px}
   .sp{flex:1}
-  .pill{font-size:12px;padding:4px 11px;border-radius:999px;background:#f1f5f9;color:var(--mut);font-weight:600;white-space:nowrap}
-  .pill.ok{background:#dcfce7;color:#166534}
-  .pill.err{background:#fee2e2;color:#991b1b}
-  .pill.warn{background:#fef3c7;color:#92400e}
-  .ver{font-size:11px;color:var(--mut)}
+  .pill{font-size:12px;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.8);border:1px solid var(--bd);color:var(--mut);font-weight:700;white-space:nowrap}
+  .pill.ok{background:#d1fae5;border-color:#a7f3d0;color:#065f46}
+  .pill.err{background:#ffe4e6;border-color:#fecdd3;color:#9f1239}
+  .pill.warn{background:#fef3c7;border-color:#fde68a;color:#92400e}
+  .ver{font-size:11px;font-weight:700;color:#fff;background:var(--g);padding:3px 8px;border-radius:999px}
+
+  /* en-tête de page */
+  .hero{padding:10px 4px 2px}
+  .hero h1{margin:0;font-size:clamp(24px,4.6vw,34px);font-weight:800;letter-spacing:-.035em;line-height:1.15}
+  .grad{background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{margin:6px 0 0;color:var(--mut);font-size:14px}
 
   /* mise en page */
-  .wrap{max-width:780px;margin:0 auto;padding:18px 16px;display:flex;flex-direction:column;gap:14px}
-  #app{display:flex;flex-direction:column;gap:14px}
-  .card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:18px 20px;box-shadow:0 1px 2px rgba(15,23,42,.04),0 4px 16px rgba(15,23,42,.03)}
-  h2{margin:0 0 14px;font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.07em}
-  .sec-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+  .wrap{max-width:800px;margin:0 auto;padding:18px 16px;display:flex;flex-direction:column;gap:16px}
+  #app{display:flex;flex-direction:column;gap:16px}
+  .card{position:relative;background:rgba(255,255,255,.74);backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);
+    border:1px solid rgba(255,255,255,.9);border-radius:var(--r);padding:20px 22px;
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 14px 34px -16px rgba(30,41,99,.22);animation:rise .35s ease both;transition:box-shadow .2s}
+  .card::before{content:"";position:absolute;top:0;left:22px;right:22px;height:3px;border-radius:0 0 4px 4px;background:linear-gradient(90deg,var(--c1,#6366f1),var(--c2,#d946ef))}
+  .card:focus-within{box-shadow:0 0 0 1.5px color-mix(in srgb,var(--c1,#6366f1) 45%,transparent),0 18px 40px -16px color-mix(in srgb,var(--c1,#6366f1) 45%,transparent)}
+  .t-violet{--c1:#8b5cf6;--c2:#d946ef}
+  .t-teal{--c1:#14b8a6;--c2:#06b6d4}
+  .t-sky{--c1:#0ea5e9;--c2:#6366f1}
+  .t-orange{--c1:#f59e0b;--c2:#f43f5e}
+  .t-pink{--c1:#ec4899;--c2:#a855f7}
+  .t-blue{--c1:#3b82f6;--c2:#06b6d4}
+  .t-slate{--c1:#94a3b8;--c2:#475569}
+  h2{margin:0 0 16px;font-size:16px;font-weight:800;letter-spacing:-.015em;display:flex;align-items:center;gap:10px}
+  .ic{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:15px;background:linear-gradient(135deg,var(--c1,#6366f1),var(--c2,#d946ef));box-shadow:0 6px 14px -5px color-mix(in srgb,var(--c1,#6366f1) 70%,transparent);flex:none}
+  .sec-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
   .sec-h h2{margin:0}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
   .full{grid-column:1/-1}
   .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .lbl{font-size:12.5px;font-weight:600;color:var(--mut);margin:16px 0 8px}
+  .lbl{font-size:12.5px;font-weight:700;color:var(--mut);margin:18px 0 8px;text-transform:uppercase;letter-spacing:.06em}
   .muted{color:var(--mut);font-size:12.5px}
 
   /* champs */
-  label.f{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--mut)}
+  label.f{display:flex;flex-direction:column;gap:6px;font-size:12.5px;font-weight:700;color:var(--mut)}
   input[type=text],input[type=date],input[type=password],input[type=email],select,textarea{
-    font:inherit;font-weight:400;height:40px;padding:8px 12px;border:1px solid var(--bd);border-radius:10px;background:#fff;color:var(--tx);width:100%;
-    transition:border-color .15s,box-shadow .15s}
-  textarea{height:auto;min-height:60px;resize:vertical}
+    font:inherit;font-weight:500;height:44px;padding:9px 13px;border:1.5px solid var(--bd);border-radius:13px;background:rgba(255,255,255,.92);color:var(--tx);width:100%;
+    transition:border-color .15s,box-shadow .15s,background .15s}
+  select{appearance:none;-webkit-appearance:none;padding-right:38px;cursor:pointer;
+    background:rgba(255,255,255,.92) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") right 14px center/12px no-repeat}
+  textarea{height:auto;min-height:64px;resize:vertical}
   input:hover,select:hover,textarea:hover{border-color:var(--bd2)}
-  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--c1,var(--acc));background-color:#fff;box-shadow:0 0 0 4px color-mix(in srgb,var(--c1,#6366f1) 18%,transparent)}
+  .big{height:52px !important;font-size:15.5px !important;font-weight:700 !important}
+  #nsCode{font-variant-numeric:tabular-nums;letter-spacing:.06em;font-weight:700}
 
   /* boutons */
-  button,.btn{font:inherit;font-weight:600;font-size:13.5px;height:38px;padding:0 14px;border:1px solid var(--bd);background:#fff;border-radius:10px;cursor:pointer;
-    display:inline-flex;align-items:center;justify-content:center;gap:6px;color:var(--tx);transition:background .15s,border-color .15s,color .15s}
-  button:hover,.btn:hover{background:#f8fafc;border-color:var(--bd2)}
-  button:disabled{opacity:.45;cursor:not-allowed}
-  button.main{background:var(--acc);border-color:var(--acc);color:#fff;height:44px;padding:0 20px;box-shadow:0 2px 8px rgba(2,132,199,.25)}
-  button.main:hover{background:var(--acc2);border-color:var(--acc2)}
-  button.alt{background:#0f172a;border-color:#0f172a;color:#fff;height:44px;padding:0 20px}
+  button,.btn{font:inherit;font-weight:700;font-size:13.5px;height:40px;padding:0 15px;border:1.5px solid var(--bd);background:rgba(255,255,255,.9);border-radius:12px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;color:var(--tx);transition:transform .12s,background .15s,border-color .15s,color .15s,box-shadow .15s}
+  button:hover,.btn:hover{border-color:var(--bd2);background:#fff;transform:translateY(-1px)}
+  button:active,.btn:active{transform:translateY(0)}
+  button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+  button.main{background:var(--g);background-size:140% 140%;border:none;color:#fff;height:48px;padding:0 22px;box-shadow:0 10px 24px -8px rgba(99,102,241,.7)}
+  button.main:hover{background-position:100% 50%;box-shadow:0 14px 28px -8px rgba(217,70,239,.6)}
+  button.alt{background:#0f172a;border:none;color:#fff;height:48px;padding:0 22px;box-shadow:0 10px 24px -10px rgba(15,23,42,.7)}
   button.alt:hover{background:#1e293b}
   .ghost{background:transparent !important;border-color:transparent !important;color:var(--acc2) !important}
   .ghost:hover{background:var(--acc-soft) !important}
-  .sm{height:32px !important;padding:0 10px !important;font-size:12.5px !important}
-  .icon{width:40px;padding:0 !important;height:40px}
+  .sm{height:34px !important;padding:0 11px !important;font-size:12.5px !important}
+  .icon{width:44px;padding:0 !important;height:44px;font-size:16px}
   .chips{display:flex;gap:8px;flex-wrap:wrap}
-  .chip{height:32px;border-radius:999px;padding:0 14px;font-size:13px}
-  .chip:hover{border-color:var(--acc);color:var(--acc2)}
+  .chip{height:34px;border-radius:999px;padding:0 15px;font-size:13px}
+  .chip:hover{border-color:transparent;color:#fff;background:linear-gradient(135deg,var(--c1),var(--c2));box-shadow:0 6px 14px -6px var(--c1)}
 
   /* cases à cocher façon « pastilles » */
-  .tog{position:relative;display:inline-flex;align-items:center;gap:9px;padding:9px 14px;border:1px solid var(--bd);border-radius:12px;cursor:pointer;font-weight:600;font-size:13.5px;user-select:none;background:#fff;transition:all .15s}
-  .tog:hover{border-color:var(--bd2)}
+  .tog{position:relative;display:inline-flex;align-items:center;gap:10px;padding:10px 15px;border:1.5px solid var(--bd);border-radius:14px;cursor:pointer;font-weight:700;font-size:13.5px;user-select:none;background:rgba(255,255,255,.9);transition:all .15s}
+  .tog:hover{border-color:var(--bd2);transform:translateY(-1px)}
   .tog input{position:absolute;opacity:0;pointer-events:none}
-  .tog::before{content:"";width:18px;height:18px;border-radius:6px;border:1.5px solid var(--bd2);background:#fff;flex:none;transition:all .15s}
-  .tog:has(input:checked){border-color:var(--acc);background:var(--acc-bg);color:var(--acc2)}
-  .tog:has(input:checked)::before{border-color:var(--acc);background:var(--acc) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='M1 5l3.5 3.5L11 1' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E") center/11px no-repeat}
-  .tog:has(input:focus-visible){box-shadow:0 0 0 3px var(--acc-soft)}
+  .tog::before{content:"";width:20px;height:20px;border-radius:7px;border:1.5px solid var(--bd2);background:#fff;flex:none;transition:all .15s}
+  .tog:has(input:checked){border-color:color-mix(in srgb,var(--c1,#6366f1) 60%,transparent);background:color-mix(in srgb,var(--c1,#6366f1) 10%,#fff);color:color-mix(in srgb,var(--c1,#6366f1) 80%,#0f172a)}
+  .tog:has(input:checked)::before{border-color:transparent;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='M1 5l3.5 3.5L11 1' fill='none' stroke='white' stroke-width='2.2'/%3E%3C/svg%3E") center/11px no-repeat,linear-gradient(135deg,var(--c1,#6366f1),var(--c2,#d946ef))}
+  .tog:has(input:focus-visible){box-shadow:0 0 0 4px var(--acc-soft)}
   .tog:has(input:disabled){opacity:.5;cursor:not-allowed}
 
   /* listes (intervenants, adresses, sites ajoutés) */
-  .list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
-  .item{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 12px;border:1px solid var(--bd);border-radius:10px;background:#fff;cursor:pointer;transition:all .15s}
-  .item:has(input:checked){border-color:var(--acc);background:var(--acc-bg)}
-  .item input{width:16px;height:16px;accent-color:var(--acc);margin:0}
+  .list{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
+  .item{position:relative;display:flex;align-items:center;gap:10px;padding:9px 9px 9px 14px;border:1.5px solid var(--bd);border-radius:13px;background:rgba(255,255,255,.9);cursor:pointer;transition:all .15s;overflow:hidden;font-weight:600}
+  .item:hover{border-color:var(--bd2)}
+  .item:has(input:checked){border-color:color-mix(in srgb,var(--c1,#6366f1) 55%,transparent);background:color-mix(in srgb,var(--c1,#6366f1) 8%,#fff)}
+  .item:has(input:checked)::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--c1),var(--c2))}
+  .item input{width:17px;height:17px;accent-color:var(--c1,var(--acc));margin:0}
   .item span{flex:1;min-width:0;overflow-wrap:anywhere}
-  .item button{border:none;background:none;height:28px;width:28px;padding:0;color:#94a3b8;font-size:18px;border-radius:8px}
-  .item button:hover{color:var(--err);background:#fee2e2}
+  .item button{border:none;background:none;height:30px;width:30px;padding:0;color:#94a3b8;font-size:18px;border-radius:9px}
+  .item button:hover{color:var(--err);background:#ffe4e6}
 
   /* messages */
-  .warn{display:none;margin-top:12px;padding:10px 12px;border-radius:10px;background:#fffbeb;color:#92400e;border:1px solid #fde68a;font-size:13px}
-  .status{font-size:13.5px;padding:10px 12px;border-radius:10px;background:#f1f5f9}
-  .status.ok{background:#dcfce7;color:#166534}
-  .status.err{background:#fee2e2;color:#991b1b}
+  .warn{display:none;margin-top:12px;padding:11px 14px;border-radius:13px;background:linear-gradient(135deg,#fffbeb,#fff1f2);color:#92400e;border:1px solid #fde68a;font-size:13px;font-weight:600}
+  .status{font-size:14px;padding:12px 14px;border-radius:13px;background:rgba(241,245,249,.9)}
+  .status.ok{background:#d1fae5;color:#065f46}
+  .status.err{background:#ffe4e6;color:#9f1239}
   .status.warn{background:#fef3c7;color:#92400e}
 
   /* résumé du préréglage + mode réduit */
-  .summary{margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:#f8fafc;border:1px solid var(--bd);font-size:13px}
-  .summary .sum{flex:1;display:flex;gap:4px 16px;flex-wrap:wrap;min-width:0}
+  .summary{margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-radius:14px;
+    background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(217,70,239,.08));border:1px dashed rgba(139,92,246,.35);font-size:13px}
+  .summary .sum{flex:1;display:flex;gap:6px;flex-wrap:wrap;min-width:0}
+  .summary .sum span{background:rgba(255,255,255,.85);border:1px solid var(--bd);padding:3px 10px;border-radius:999px;font-weight:600}
   body.compact .adv{display:none}
 
   /* sous-blocs repliables */
-  details>summary{cursor:pointer;font-weight:600;color:var(--acc2);list-style:none;font-size:13.5px}
+  details>summary{cursor:pointer;font-weight:700;color:var(--acc2);list-style:none;font-size:13.5px}
   details>summary::-webkit-details-marker{display:none}
   details>summary::before{content:"▸";display:inline-block;width:16px;transition:transform .15s}
   details[open]>summary::before{transform:rotate(90deg)}
-  .sub{border:1px dashed var(--bd2);border-radius:12px;padding:12px 14px;background:#fafcfe}
+  .sub{border:1.5px dashed color-mix(in srgb,var(--c1,#6366f1) 40%,transparent);border-radius:15px;padding:13px 15px;background:color-mix(in srgb,var(--c1,#6366f1) 4%,rgba(255,255,255,.8))}
 
-  .sigbox{background:#fff;border:1px dashed var(--bd2);border-radius:12px;padding:10px;text-align:center}
+  .sigbox{background:repeating-linear-gradient(0deg,#fff 0 33px,#eef2ff 33px 34px);border:1.5px dashed color-mix(in srgb,var(--c1) 45%,transparent);border-radius:15px;padding:10px;text-align:center}
   #sigCanvas{max-width:100%;height:auto;max-height:110px}
-  #log{font:12px/1.5 Consolas,ui-monospace,monospace;background:#0f172a;color:#cbd5e1;border-radius:10px;padding:10px 12px;max-height:200px;overflow:auto;white-space:pre-wrap}
+  #log{font:12px/1.5 Consolas,ui-monospace,monospace;background:#0b1020;color:#a5b4fc;border-radius:13px;padding:11px 13px;max-height:200px;overflow:auto;white-space:pre-wrap}
 
-  /* barre d'actions fixe en bas */
-  .actionbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--bd)}
-  .actionbar .in{max-width:780px;margin:0 auto;padding:12px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  #msg{font-size:13px;font-weight:600;flex:1;min-width:140px}
-  @media (max-width:560px){ .actionbar .in button{flex:1} .brand small{display:none} }
+  /* barre d'actions flottante */
+  .actionbar{position:fixed;left:12px;right:12px;bottom:14px;z-index:20;pointer-events:none}
+  .actionbar .in{pointer-events:auto;max-width:776px;margin:0 auto;padding:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    background:rgba(255,255,255,.72);backdrop-filter:blur(18px) saturate(1.6);-webkit-backdrop-filter:blur(18px) saturate(1.6);
+    border:1px solid rgba(255,255,255,.9);border-radius:20px;box-shadow:0 18px 40px -14px rgba(30,41,99,.35)}
+  #msg{font-size:13px;font-weight:700;flex:1;min-width:140px;padding:0 6px}
+  @media (max-width:560px){ .actionbar .in button{flex:1} .brand small{display:none} .card{padding:18px 16px} }
 </style>
 </head>
 <body>
@@ -128,14 +172,19 @@
   <div class="brand"><b>DAS Vendée Eau</b><small>Demande d'ouverture de réservoir</small></div>
   <span class="sp"></span>
   <span id="pill" class="pill">Démarrage…</span>
-  <span class="ver">v1.9</span>
+  <span class="ver">v1.10</span>
 </div></header>
 
 <main class="wrap">
 
+  <div class="hero">
+    <h1>Ta demande d'ouverture,<br><span class="grad">prête en 30 secondes.</span></h1>
+    <p>Choisis un préréglage, le site et la date : le PDF officiel est rempli et signé.</p>
+  </div>
+
   <!-- ===== Accès protégé ===== -->
-  <section id="lockCard" class="card">
-    <h2>Accès</h2>
+  <section id="lockCard" class="card t-violet">
+    <h2><span class="ic">🔐</span>Accès</h2>
     <div id="lockStatus" class="status">⏳ Démarrage…</div>
     <div id="unlockBox" class="row hidden" style="margin-top:12px">
       <input type="password" id="pwd" placeholder="Mot de passe" autocomplete="current-password" style="flex:1;min-width:200px">
@@ -146,9 +195,9 @@
   <!-- ===== Application (visible après déverrouillage) ===== -->
   <div id="app" class="hidden">
 
-    <section class="card">
+    <section class="card t-violet">
       <div class="sec-h">
-        <h2>Préréglage</h2>
+        <h2><span class="ic">⚡</span>Préréglage</h2>
         <div class="row" style="gap:2px">
           <button id="pExport" class="ghost sm" title="Télécharger un fichier avec tes préréglages, intervenants, adresses en copie et sites ajoutés">⬇ Exporter</button>
    <label class="btn ghost sm" title="Reprendre les réglages exportés depuis un autre PC">⬆ Importer<input type="file" id="pImport" accept=".json,application/json" hidden></label>
@@ -166,22 +215,26 @@
       </div>
     </section>
 
-    <section class="card">
-      <h2>Date et nature</h2>
-      <div class="grid">
- <label class="f">Date
-   <input type="date" id="date">
- </label>
+    <!-- Toujours visible, même en mode réduit -->
+    <section class="card t-teal">
+      <h2><span class="ic">📍</span>Intervention</h2>
+      <label class="f">Réservoir / site
+ <select id="site" class="big"></select>
+      </label>
+      <div class="grid" style="margin-top:12px">
+        <label class="f">Date
+          <input type="date" id="date">
+        </label>
         <label class="f">Heure d'ouverture
-          <select id="heure"></select>
-        </label>
+   <select id="heure"></select>
+ </label>
         <label class="f">Durée
-   <input type="text" id="duree" list="dlDuree" placeholder="2h">
-        </label>
+          <input type="text" id="duree" list="dlDuree" placeholder="2h">
+ </label>
       </div>
-      <div class="chips" style="margin-top:10px">
+      <div class="chips" style="margin-top:12px">
         <button class="chip" id="dToday">Aujourd'hui</button>
-        <button class="chip" id="dTomorrow">Demain</button>
+ <button class="chip" id="dTomorrow">Demain</button>
         <button class="chip" id="d10">J+10</button>
       </div>
       <div class="warn" id="warn"></div>
@@ -193,153 +246,150 @@
       </div>
     </section>
 
-    <section class="card adv">
-      <h2>Site</h2>
+    <section class="card t-sky adv">
+      <h2><span class="ic">🏗</span>Détails du site</h2>
       <div class="grid">
-        <label class="f full">Réservoir / site
-   <select id="site"></select>
-        </label>
         <div class="full">
    <details id="addSiteBox" class="sub">
-            <summary>Ajouter un château d'eau absent de la liste</summary>
+     <summary>Ajouter un château d'eau absent de la liste</summary>
      <div class="grid" style="margin-top:12px">
-       <label class="f">Code site
-  <input type="text" id="nsCode" maxlength="9" inputmode="numeric" value="85" placeholder="85000_000">
+<label class="f">Code site
+         <input type="text" id="nsCode" maxlength="9" inputmode="numeric" value="85" placeholder="85000_000" autocomplete="off">
        </label>
        <label class="f" style="grid-column:span 2">Nom (comme sur le PDF)
          <input type="text" id="nsName" placeholder="Commune / réservoir">
        </label>
        <label class="f full">Nom tel qu'il apparaîtra dans la liste (modifiable)
-         <input type="text" id="nsFinal">
-</label>
+  <input type="text" id="nsFinal">
+       </label>
        <div class="full muted" id="nsInfo"></div>
        <div class="full row"><button id="nsAdd">＋ Ajouter à la liste</button></div>
-<div class="full">
+       <div class="full">
          <div class="muted" style="margin-bottom:6px">Sites que tu as ajoutés</div>
-  <div class="list" id="nsList"></div>
+         <div class="list" id="nsList"></div>
        </div>
      </div>
-          </details>
+   </details>
         </div>
-        <label class="f full">Objet de la demande
-          <textarea id="objet"></textarea>
+ <label class="f full">Objet de la demande
+   <textarea id="objet"></textarea>
         </label>
         <label class="f">Date courrier d'accord (si travaux)
-          <input type="date" id="courrier">
-        </label>
- <label class="f">Tél. intervenant en cas de problème
-          <input type="text" id="telPb" list="dlTel">
+   <input type="date" id="courrier">
  </label>
+        <label class="f">Tél. intervenant en cas de problème
+   <input type="text" id="telPb" list="dlTel">
+        </label>
       </div>
     </section>
 
-    <section class="card adv">
-      <h2>Demandeur et intervenants</h2>
+    <section class="card t-orange adv">
+      <h2><span class="ic">👷</span>Demandeur et intervenants</h2>
       <div class="grid">
- <label class="f">Opérateur demandeur
-   <input type="text" id="op" value="FREE">
- </label>
+        <label class="f">Opérateur demandeur
+          <input type="text" id="op" value="FREE">
+        </label>
         <label class="f">Entreprise intervenante
    <input type="text" id="ent" value="FREE">
-        </label>
- <label class="f full">Responsable (nom, mail, tél.)
+ </label>
+        <label class="f full">Responsable (nom, mail, tél.)
    <input type="text" id="resp" list="dlResp">
         </label>
-        <div class="full">
-   <div class="lbl" style="margin-top:4px">Intervenants (cocher les présents)</div>
-          <div class="list" id="people"></div>
-   <div class="row">
-            <input type="text" id="pName" placeholder="NOM Prénom" style="flex:2;min-width:160px">
-     <input type="text" id="pSoc" placeholder="Société" value="FREE" style="flex:1;min-width:90px">
+ <div class="full">
+          <div class="lbl" style="margin-top:4px">Intervenants (cocher les présents)</div>
+   <div class="list" id="people"></div>
+          <div class="row">
+     <input type="text" id="pName" placeholder="NOM Prénom" style="flex:2;min-width:160px">
+            <input type="text" id="pSoc" placeholder="Société" value="FREE" style="flex:1;min-width:90px">
      <button id="pAdd">＋ Ajouter</button>
-   </div>
-        </div>
+          </div>
+ </div>
         <label class="f full">Immatriculation(s) du/des véhicule(s)
-   <input type="text" id="plaque" list="dlPlaque">
+          <input type="text" id="plaque" list="dlPlaque">
         </label>
       </div>
     </section>
 
-    <section class="card adv">
-      <h2>Signature</h2>
+    <section class="card t-pink adv">
+      <h2><span class="ic">✍️</span>Signature</h2>
       <div class="grid">
- <div class="full"><label class="tog"><input type="checkbox" id="sigOn" checked>Ajouter une signature générée à partir du nom</label></div>
+        <div class="full"><label class="tog"><input type="checkbox" id="sigOn" checked>Ajouter une signature générée à partir du nom</label></div>
         <label class="f">Signataire
-   <select id="sigWho"></select>
- </label>
-        <label class="f">Forme
-          <select id="sigStyle">
+          <select id="sigWho"></select>
+        </label>
+ <label class="f">Forme
+   <select id="sigStyle">
      <option value="init">Initiale + nom</option>
      <option value="full">Nom complet</option>
-            <option value="paraphe">Paraphe (initiales)</option>
-   </select>
- </label>
-        <label class="f">Écriture
-   <select id="sigFont">
+     <option value="paraphe">Paraphe (initiales)</option>
+          </select>
+        </label>
+ <label class="f">Écriture
+          <select id="sigFont">
      <option>Herr Von Muellerhoff</option>
      <option>Mrs Saint Delafield</option>
-            <option>Great Vibes</option>
-          </select>
+     <option>Great Vibes</option>
+   </select>
         </label>
         <div class="full sigbox"><canvas id="sigCanvas" width="400" height="170"></canvas></div>
       </div>
     </section>
 
-    <section class="card adv">
-      <h2>Mail</h2>
+    <section class="card t-blue adv">
+      <h2><span class="ic">✉️</span>Mail</h2>
       <div class="grid">
-        <label class="f">Messagerie
-   <select id="mailApp">
+ <label class="f">Messagerie
+          <select id="mailApp">
      <option value="web">Outlook web</option>
      <option value="pc">Outlook PC (application)</option>
-   </select>
+          </select>
         </label>
         <div style="align-self:end"><label class="tog"><input type="checkbox" id="cc" checked><span id="ccLabel">Copie Vendée Eau</span></label></div>
-        <div class="full">
-   <div class="lbl" style="margin-top:4px">Autres adresses en copie (cocher celles à mettre en copie)</div>
-   <div class="list" id="ccList"></div>
-          <div class="row">
-     <input type="text" id="ccNew" placeholder="adresse@exemple.fr (plusieurs possibles, séparées par ; )" style="flex:1;min-width:220px">
+ <div class="full">
+          <div class="lbl" style="margin-top:4px">Autres adresses en copie (cocher celles à mettre en copie)</div>
+          <div class="list" id="ccList"></div>
+   <div class="row">
+            <input type="text" id="ccNew" placeholder="adresse@exemple.fr (plusieurs possibles, séparées par ; )" style="flex:1;min-width:220px">
      <button id="ccAdd">＋ Ajouter</button>
-          </div>
- </div>
+   </div>
+        </div>
         <div class="full muted">Le PDF se télécharge, puis il faut le glisser dans le mail (ni le navigateur ni Outlook web ne peuvent joindre un fichier tout seuls).</div>
       </div>
     </section>
   </div>
 
   <!-- ===== Outils / administration / journal ===== -->
-  <section class="card">
+  <section class="card t-slate">
     <details id="toolsBox">
       <summary>Outils, administration et journal</summary>
       <div class="row" style="margin-top:12px">
-        <button id="relock" class="sm">🔒 Verrouiller ce PC</button>
+ <button id="relock" class="sm">🔒 Verrouiller ce PC</button>
         <button id="tplFields" class="sm">🔍 Lister les champs</button>
       </div>
       <details id="admBox" class="sub" style="margin-top:12px">
         <summary>Administration : créer formulaire.enc</summary>
- <p class="muted">Tout se fait dans ton navigateur : le PDF n'est envoyé nulle part. Le fichier obtenu est illisible sans le mot de passe.</p>
- <div class="grid">
-          <div class="full row">
+        <p class="muted">Tout se fait dans ton navigateur : le PDF n'est envoyé nulle part. Le fichier obtenu est illisible sans le mot de passe.</p>
+        <div class="grid">
+   <div class="full row">
      <label class="btn">📂 1. Choisir le PDF<input type="file" id="admFile" accept="application/pdf,.pdf" hidden></label>
      <span id="admInfo" class="muted">Aucun PDF choisi.</span>
-   </div>
-          <label class="f full">2. Liste des sites (un par ligne, reprise automatiquement du PDF)
+          </div>
+   <label class="f full">2. Liste des sites (un par ligne, reprise automatiquement du PDF)
      <textarea id="admSites" style="min-height:120px"></textarea>
-   </label>
-   <label class="f">3. Destinataire du mail
+          </label>
+          <label class="f">3. Destinataire du mail
      <input type="email" id="admTo" placeholder="adresse d'ouverture des sites">
    </label>
-   <label class="f">Copie (facultatif)
+          <label class="f">Copie (facultatif)
      <input type="email" id="admCc" placeholder="adresse en copie">
           </label>
-          <label class="f">4. Mot de passe (12 caractères min.)
+   <label class="f">4. Mot de passe (12 caractères min.)
      <input type="password" id="admPwd1" autocomplete="new-password">
    </label>
-   <label class="f">Confirmer le mot de passe
+          <label class="f">Confirmer le mot de passe
      <input type="password" id="admPwd2" autocomplete="new-password">
-   </label>
-   <div class="full row">
+          </label>
+          <div class="full row">
      <button id="admEnc" class="main">🔒 5. Créer formulaire.enc</button>
    </div>
         </div>
@@ -366,7 +416,7 @@
 'use strict';
 document.getElementById('noJs').remove();
 
-const VERSION = '1.9';
+const VERSION = '1.10';
 const ENC_URL = 'formulaire.enc';          // fichier chiffré, à côté de index.html sur GitHub
 const MAGIC = 'VDE1', PBKDF2_ITER = 600000;
 /* Position de la signature sur la page 2 (en points, A4 = 595 x 842, mesuré depuis le HAUT) */
@@ -567,16 +617,22 @@ function renderXSites(){
     row.append(sp, del); box.appendChild(row);
   });
 }
-/* Code site : chiffres uniquement, « _ » ajouté automatiquement après le 5e chiffre */
-function fmtCode(v){
+/* Code site : chiffres uniquement ; le « _ » apparaît dès le 5e chiffre tapé.
+   En effacement, on laisse la saisie telle quelle (sinon impossible d'effacer le « _ »). */
+function fmtCode(v, deleting){
+  if(deleting && /^\d{0,5}(_\d{0,3})?$/.test(v)) return v;
   const d = String(v).replace(/\D/g, '').slice(0, 8);
-  return d.length > 5 ? d.slice(0, 5) + '_' + d.slice(5) : d;
+  return d.length >= 5 ? d.slice(0, 5) + '_' + d.slice(5) : d;
 }
-function nsAuto(){
-  const raw = $('nsCode').value, code = fmtCode(raw), name = $('nsName').value;
-  if(code !== raw) $('nsCode').value = code;
-  const hasCode = code.length > 2;
-  $('nsFinal').value = (hasCode || name.trim()) ? formatSite(hasCode ? code : '', name) : '';
+function nsAuto(e){
+  const el = $('nsCode'), raw = el.value;
+  const deleting = !!(e && e.target === el && e.inputType && e.inputType.indexOf('delete') === 0);
+  const code = fmtCode(raw, deleting);
+  if(code !== raw){ el.value = code; try{ el.setSelectionRange(code.length, code.length); }catch(_){} }
+  const codeTxt = code.replace(/_$/, '');
+  const hasCode = codeTxt.replace(/\D/g, '').length > 2;
+  const name = $('nsName').value;
+  $('nsFinal').value = (hasCode || name.trim()) ? formatSite(hasCode ? codeTxt : '', name) : '';
   nsPreview();
 }
 function nsPreview(){
@@ -591,7 +647,7 @@ function nsPreview(){
     (after ? ', avant « ' + after + ' »' : ', en fin de liste') + ' (' + modeTxt + ').';
 }
 $('nsCode').addEventListener('input', nsAuto);
-$('nsName').addEventListener('input', nsAuto);
+$('nsName').addEventListener('input', () => nsAuto());
 $('nsFinal').addEventListener('input', nsPreview);
 $('nsAdd').onclick = () => {
   const f = $('nsFinal').value.trim().replace(/\s+/g, ' ');
@@ -755,8 +811,8 @@ function renderSummary(){
   $('toggleView').textContent = isCompact() ? '✏️ Tout afficher' : '▴ Réduire';
   const pres = people.filter(p => checked.has(p.n)).map(p => p.n);
   const nCc = ccAddresses().length;
+  /* le site n'est plus dans le résumé : il reste sélectionnable en mode réduit */
   const items = [
-    ['📍', $('site').value || '—'],
     ['👷', pres.join(', ') || 'aucun intervenant coché'],
     ['🚗', $('plaque').value.trim()],
     ['✉️', ($('mailApp').value === 'pc' ? 'Outlook PC' : 'Outlook web') + (nCc ? ' · ' + nCc + ' en copie' : ' · sans copie')]
@@ -1105,7 +1161,7 @@ async function fillTemplate(d, sig){
       if(f instanceof PDFTextField){ f.setText(clean(v)); }
       else if(f instanceof PDFDropdown){
         const val = clean(v);
-        if(!val){ f.clear(); return; }
+ if(!val){ f.clear(); return; }
         if(!f.getOptions().includes(val)) f.enableEditing();
         f.select(val);
       }
