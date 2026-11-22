@@ -4,276 +4,357 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>DAS Vendée Eau v1.8</title>
+<title>DAS Vendée Eau v1.9</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Herr+Von+Muellerhoff&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <style>
-  :root{--c:#0a8fd0;--c2:#076a9b;--bg:#f2f6f9;--bd:#d5dee6;--ok:#2e9d4f;--warn:#e08a00;--err:#d33}
+  :root{
+    --acc:#0284c7;--acc2:#0369a1;--acc-soft:#e0f2fe;--acc-bg:#f0f9ff;
+    --bg:#f4f6f9;--card:#fff;--bd:#e2e8f0;--bd2:#cbd5e1;--tx:#0f172a;--mut:#64748b;
+    --ok:#16a34a;--warn:#d97706;--err:#dc2626;--r:16px
+  }
   *{box-sizing:border-box}
-  body{margin:0;font:14px/1.4 system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:#1d2933}
-  .nojs{background:#d33;color:#fff;padding:10px 14px;text-align:center;font-weight:600}
-  .wrap{max-width:860px;margin:0 auto;padding:16px}
-  header{display:flex;align-items:center;justify-content:space-between;background:var(--c);color:#fff;padding:12px 16px;border-radius:10px 10px 0 0}
-  header h1{margin:0;font-size:18px}
-  header small{opacity:.85}
-  .card{background:#fff;border:1px solid var(--bd);border-top:none;padding:14px 16px}
-  .card.last{border-radius:0 0 10px 10px}
-  h2{margin:0 0 10px;font-size:14px;color:var(--c2);text-transform:uppercase;letter-spacing:.03em}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
-  .full{grid-column:1/-1}
-  label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:#53636f}
-  input[type=text],input[type=date],input[type=password],input[type=email],select,textarea{font:inherit;padding:7px 8px;border:1px solid var(--bd);border-radius:6px;background:#fff;color:#1d2933;width:100%}
-  textarea{min-height:52px;resize:vertical}
-  input:focus,select:focus,textarea:focus{outline:2px solid var(--c);outline-offset:-1px}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .chk{display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
-  button,.btn{font:inherit;border:1px solid var(--bd);background:#fff;border-radius:6px;padding:6px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;color:#1d2933}
-  button:hover,.btn:hover{border-color:var(--c)}
-  button.main{background:var(--c);color:#fff;border-color:var(--c);font-weight:600;padding:9px 14px}
-  button.main:hover{background:var(--c2)}
-  button.sm,.btn.sm{padding:3px 8px;font-size:12px}
-  button:disabled{opacity:.45;cursor:not-allowed}
-  .people{display:flex;flex-direction:column;gap:4px;margin-bottom:6px}
-  .person{display:flex;align-items:center;gap:8px;padding:4px 6px;border:1px solid var(--bd);border-radius:6px}
-  .person span{flex:1}
-  .person button{border:none;color:#999;padding:0 6px;font-size:16px}
-  .person button:hover{color:var(--err)}
-  .warn{display:none;margin-top:8px;padding:7px 10px;border-radius:6px;background:#fff4e0;color:#8a5300;border:1px solid #f3cf8f;font-size:13px}
-  .sigbox{background:#fff repeating-linear-gradient(0deg,#fff 0 27px,#eef3f7 27px 28px);border:1px dashed var(--bd);border-radius:6px;padding:6px;text-align:center}
-  #sigCanvas{max-width:100%;height:auto;max-height:110px}
-  .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  #msg{font-size:13px;font-weight:600}
-  .status{font-size:13px;padding:8px 10px;border-radius:6px;background:#eef5fb;margin-bottom:8px}
-  .status.ok{background:#e8f6ec;color:#1f6b36}
-  .status.err{background:#fdeaea;color:#9b1c1c}
-  .status.warn{background:#fff4e0;color:#8a5300}
-  details summary{cursor:pointer;color:var(--c2);font-weight:600}
-  .sub{border:1px solid var(--bd);border-radius:6px;padding:8px 10px;background:#f8fbfd}
-  #log{font:12px/1.45 Consolas,monospace;background:#0f1a22;color:#cfe3f1;border-radius:6px;padding:8px;max-height:180px;overflow:auto;white-space:pre-wrap}
-  .muted{color:#7a8a96;font-size:12px}
+  body{margin:0;font:14.5px/1.5 "Segoe UI Variable","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--bg);color:var(--tx);padding-bottom:96px;-webkit-font-smoothing:antialiased}
+  .nojs{background:var(--err);color:#fff;padding:10px 14px;text-align:center;font-weight:600}
   .hidden{display:none !important}
+
+  /* barre du haut */
+  .top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--bd)}
+  .top-in{max-width:780px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:10px 16px}
+  .logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#38bdf8,#0369a1);display:grid;place-items:center;font-size:19px;box-shadow:0 4px 12px rgba(3,105,161,.25)}
+  .brand b{display:block;font-size:15.5px;letter-spacing:-.01em}
+  .brand small{display:block;color:var(--mut);font-size:12px;margin-top:-2px}
+  .sp{flex:1}
+  .pill{font-size:12px;padding:4px 11px;border-radius:999px;background:#f1f5f9;color:var(--mut);font-weight:600;white-space:nowrap}
+  .pill.ok{background:#dcfce7;color:#166534}
+  .pill.err{background:#fee2e2;color:#991b1b}
+  .pill.warn{background:#fef3c7;color:#92400e}
+  .ver{font-size:11px;color:var(--mut)}
+
+  /* mise en page */
+  .wrap{max-width:780px;margin:0 auto;padding:18px 16px;display:flex;flex-direction:column;gap:14px}
+  #app{display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:18px 20px;box-shadow:0 1px 2px rgba(15,23,42,.04),0 4px 16px rgba(15,23,42,.03)}
+  h2{margin:0 0 14px;font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.07em}
+  .sec-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+  .sec-h h2{margin:0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+  .full{grid-column:1/-1}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .lbl{font-size:12.5px;font-weight:600;color:var(--mut);margin:16px 0 8px}
+  .muted{color:var(--mut);font-size:12.5px}
+
+  /* champs */
+  label.f{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:600;color:var(--mut)}
+  input[type=text],input[type=date],input[type=password],input[type=email],select,textarea{
+    font:inherit;font-weight:400;height:40px;padding:8px 12px;border:1px solid var(--bd);border-radius:10px;background:#fff;color:var(--tx);width:100%;
+    transition:border-color .15s,box-shadow .15s}
+  textarea{height:auto;min-height:60px;resize:vertical}
+  input:hover,select:hover,textarea:hover{border-color:var(--bd2)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-soft)}
+
+  /* boutons */
+  button,.btn{font:inherit;font-weight:600;font-size:13.5px;height:38px;padding:0 14px;border:1px solid var(--bd);background:#fff;border-radius:10px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;color:var(--tx);transition:background .15s,border-color .15s,color .15s}
+  button:hover,.btn:hover{background:#f8fafc;border-color:var(--bd2)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  button.main{background:var(--acc);border-color:var(--acc);color:#fff;height:44px;padding:0 20px;box-shadow:0 2px 8px rgba(2,132,199,.25)}
+  button.main:hover{background:var(--acc2);border-color:var(--acc2)}
+  button.alt{background:#0f172a;border-color:#0f172a;color:#fff;height:44px;padding:0 20px}
+  button.alt:hover{background:#1e293b}
+  .ghost{background:transparent !important;border-color:transparent !important;color:var(--acc2) !important}
+  .ghost:hover{background:var(--acc-soft) !important}
+  .sm{height:32px !important;padding:0 10px !important;font-size:12.5px !important}
+  .icon{width:40px;padding:0 !important;height:40px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{height:32px;border-radius:999px;padding:0 14px;font-size:13px}
+  .chip:hover{border-color:var(--acc);color:var(--acc2)}
+
+  /* cases à cocher façon « pastilles » */
+  .tog{position:relative;display:inline-flex;align-items:center;gap:9px;padding:9px 14px;border:1px solid var(--bd);border-radius:12px;cursor:pointer;font-weight:600;font-size:13.5px;user-select:none;background:#fff;transition:all .15s}
+  .tog:hover{border-color:var(--bd2)}
+  .tog input{position:absolute;opacity:0;pointer-events:none}
+  .tog::before{content:"";width:18px;height:18px;border-radius:6px;border:1.5px solid var(--bd2);background:#fff;flex:none;transition:all .15s}
+  .tog:has(input:checked){border-color:var(--acc);background:var(--acc-bg);color:var(--acc2)}
+  .tog:has(input:checked)::before{border-color:var(--acc);background:var(--acc) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='M1 5l3.5 3.5L11 1' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E") center/11px no-repeat}
+  .tog:has(input:focus-visible){box-shadow:0 0 0 3px var(--acc-soft)}
+  .tog:has(input:disabled){opacity:.5;cursor:not-allowed}
+
+  /* listes (intervenants, adresses, sites ajoutés) */
+  .list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+  .item{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 12px;border:1px solid var(--bd);border-radius:10px;background:#fff;cursor:pointer;transition:all .15s}
+  .item:has(input:checked){border-color:var(--acc);background:var(--acc-bg)}
+  .item input{width:16px;height:16px;accent-color:var(--acc);margin:0}
+  .item span{flex:1;min-width:0;overflow-wrap:anywhere}
+  .item button{border:none;background:none;height:28px;width:28px;padding:0;color:#94a3b8;font-size:18px;border-radius:8px}
+  .item button:hover{color:var(--err);background:#fee2e2}
+
+  /* messages */
+  .warn{display:none;margin-top:12px;padding:10px 12px;border-radius:10px;background:#fffbeb;color:#92400e;border:1px solid #fde68a;font-size:13px}
+  .status{font-size:13.5px;padding:10px 12px;border-radius:10px;background:#f1f5f9}
+  .status.ok{background:#dcfce7;color:#166534}
+  .status.err{background:#fee2e2;color:#991b1b}
+  .status.warn{background:#fef3c7;color:#92400e}
+
+  /* résumé du préréglage + mode réduit */
+  .summary{margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:#f8fafc;border:1px solid var(--bd);font-size:13px}
+  .summary .sum{flex:1;display:flex;gap:4px 16px;flex-wrap:wrap;min-width:0}
+  body.compact .adv{display:none}
+
+  /* sous-blocs repliables */
+  details>summary{cursor:pointer;font-weight:600;color:var(--acc2);list-style:none;font-size:13.5px}
+  details>summary::-webkit-details-marker{display:none}
+  details>summary::before{content:"▸";display:inline-block;width:16px;transition:transform .15s}
+  details[open]>summary::before{transform:rotate(90deg)}
+  .sub{border:1px dashed var(--bd2);border-radius:12px;padding:12px 14px;background:#fafcfe}
+
+  .sigbox{background:#fff;border:1px dashed var(--bd2);border-radius:12px;padding:10px;text-align:center}
+  #sigCanvas{max-width:100%;height:auto;max-height:110px}
+  #log{font:12px/1.5 Consolas,ui-monospace,monospace;background:#0f172a;color:#cbd5e1;border-radius:10px;padding:10px 12px;max-height:200px;overflow:auto;white-space:pre-wrap}
+
+  /* barre d'actions fixe en bas */
+  .actionbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--bd)}
+  .actionbar .in{max-width:780px;margin:0 auto;padding:12px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  #msg{font-size:13px;font-weight:600;flex:1;min-width:140px}
+  @media (max-width:560px){ .actionbar .in button{flex:1} .brand small{display:none} }
 </style>
 </head>
 <body>
 <div id="noJs" class="nojs">⛔ Les scripts de la page ne démarrent pas. Le code a sans doute été copié depuis l'aperçu (Cloudflare) : recolle-le depuis l'artifact « code » (aucun « rocket-loader » ne doit apparaître).</div>
-<div class="wrap">
-  <header><h1>💧 DAS Vendée Eau</h1><small>v1.8</small></header>
+
+<header class="top"><div class="top-in">
+  <div class="logo">💧</div>
+  <div class="brand"><b>DAS Vendée Eau</b><small>Demande d'ouverture de réservoir</small></div>
+  <span class="sp"></span>
+  <span id="pill" class="pill">Démarrage…</span>
+  <span class="ver">v1.9</span>
+</div></header>
+
+<main class="wrap">
 
   <!-- ===== Accès protégé ===== -->
-  <div class="card">
+  <section id="lockCard" class="card">
     <h2>Accès</h2>
     <div id="lockStatus" class="status">⏳ Démarrage…</div>
-    <div id="unlockBox" class="row hidden">
-      <input type="password" id="pwd" placeholder="Mot de passe" autocomplete="current-password" style="flex:1;min-width:180px">
+    <div id="unlockBox" class="row hidden" style="margin-top:12px">
+      <input type="password" id="pwd" placeholder="Mot de passe" autocomplete="current-password" style="flex:1;min-width:200px">
       <button id="unlockBtn" class="main">🔓 Déverrouiller</button>
     </div>
-    <div class="row" style="margin-top:6px">
-      <button id="relock" class="sm">🔒 Verrouiller ce PC</button>
-      <button id="tplFields" class="sm">🔍 Lister les champs</button>
-    </div>
-  </div>
+  </section>
 
   <!-- ===== Application (visible après déverrouillage) ===== -->
   <div id="app" class="hidden">
-    <div class="card">
-      <h2>Préréglage</h2>
-      <div class="row">
- <select id="preset" style="max-width:260px"><option value="">— préréglage —</option></select>
-        <button id="pSave" title="Enregistrer le préréglage">💾</button>
-        <button id="pRename" title="Renommer">🏷</button>
-        <button id="pDel" title="Supprimer">🗑</button>
- <span style="flex:1"></span>
-        <button id="pExport" class="sm" title="Télécharger un fichier avec tes préréglages, intervenants, adresses en copie et sites ajoutés">⬇ Exporter mes réglages</button>
-        <label class="btn sm" title="Reprendre les réglages exportés depuis un autre PC">⬆ Importer<input type="file" id="pImport" accept=".json,application/json" hidden></label>
-      </div>
-    </div>
 
-    <div class="card">
-      <h2>Intervention</h2>
+    <section class="card">
+      <div class="sec-h">
+        <h2>Préréglage</h2>
+        <div class="row" style="gap:2px">
+          <button id="pExport" class="ghost sm" title="Télécharger un fichier avec tes préréglages, intervenants, adresses en copie et sites ajoutés">⬇ Exporter</button>
+   <label class="btn ghost sm" title="Reprendre les réglages exportés depuis un autre PC">⬆ Importer<input type="file" id="pImport" accept=".json,application/json" hidden></label>
+ </div>
+      </div>
+      <div class="row">
+ <select id="preset" style="flex:1;min-width:180px"><option value="">— Aucun préréglage —</option></select>
+        <button id="pSave" class="icon" title="Enregistrer le préréglage">💾</button>
+        <button id="pRename" class="icon" title="Renommer">✏️</button>
+        <button id="pDel" class="icon" title="Supprimer">🗑</button>
+      </div>
+      <div id="summary" class="summary hidden">
+ <div id="sumText" class="sum"></div>
+        <button id="toggleView" class="ghost sm">✏️ Tout afficher</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Date et nature</h2>
+      <div class="grid">
+ <label class="f">Date
+   <input type="date" id="date">
+ </label>
+        <label class="f">Heure d'ouverture
+          <select id="heure"></select>
+        </label>
+        <label class="f">Durée
+   <input type="text" id="duree" list="dlDuree" placeholder="2h">
+        </label>
+      </div>
+      <div class="chips" style="margin-top:10px">
+        <button class="chip" id="dToday">Aujourd'hui</button>
+        <button class="chip" id="dTomorrow">Demain</button>
+        <button class="chip" id="d10">J+10</button>
+      </div>
+      <div class="warn" id="warn"></div>
+      <div class="lbl">Nature de l'intervention</div>
+      <div class="chips">
+        <label class="tog"><input type="checkbox" id="cPortail">Ouverture portail</label>
+        <label class="tog"><input type="checkbox" id="cPortillon">Accès baie par portillon</label>
+        <label class="tog"><input type="checkbox" id="cChateau">Ouverture château d'eau</label>
+      </div>
+    </section>
+
+    <section class="card adv">
+      <h2>Site</h2>
       <div class="grid">
         <label class="f full">Réservoir / site
    <select id="site"></select>
         </label>
         <div class="full">
    <details id="addSiteBox" class="sub">
-            <summary>＋ Ajouter un château d'eau absent de la liste</summary>
-     <div class="grid" style="margin-top:8px">
-       <label class="f">Code (5 chiffres)
-         <input type="text" id="nsCode" maxlength="5" inputmode="numeric" placeholder="85000">
+            <summary>Ajouter un château d'eau absent de la liste</summary>
+     <div class="grid" style="margin-top:12px">
+       <label class="f">Code site
+  <input type="text" id="nsCode" maxlength="9" inputmode="numeric" value="85" placeholder="85000_000">
        </label>
        <label class="f" style="grid-column:span 2">Nom (comme sur le PDF)
-  <input type="text" id="nsName" placeholder="Commune / réservoir">
+         <input type="text" id="nsName" placeholder="Commune / réservoir">
        </label>
        <label class="f full">Nom tel qu'il apparaîtra dans la liste (modifiable)
          <input type="text" id="nsFinal">
-       </label>
+</label>
        <div class="full muted" id="nsInfo"></div>
        <div class="full row"><button id="nsAdd">＋ Ajouter à la liste</button></div>
-       <div class="full">
-  <div class="muted" style="margin-bottom:4px">Sites que tu as ajoutés</div>
-  <div class="people" id="nsList"></div>
+<div class="full">
+         <div class="muted" style="margin-bottom:6px">Sites que tu as ajoutés</div>
+  <div class="list" id="nsList"></div>
        </div>
      </div>
           </details>
         </div>
-        <label class="f">Date
-          <input type="date" id="date">
- </label>
-        <label class="f">Heure d'ouverture
-   <select id="heure"></select>
- </label>
-        <label class="f">Durée
-          <input type="text" id="duree" list="dlDuree" placeholder="2h">
-        </label>
-        <div class="row" style="align-self:end">
-          <button class="sm" id="dToday">Aujourd'hui</button>
-   <button class="sm" id="dTomorrow">Demain</button>
-          <button class="sm" id="d10">+10 j</button>
-        </div>
- <label class="f full">Objet de la demande
+        <label class="f full">Objet de la demande
           <textarea id="objet"></textarea>
- </label>
-        <div class="full">
-   <div class="muted">Nature de l'intervention</div>
-   <div class="row" style="gap:16px;margin-top:4px">
-            <label class="chk"><input type="checkbox" id="cPortail"> Ouverture portail</label>
-     <label class="chk"><input type="checkbox" id="cPortillon"> Accès baie par portillon</label>
-     <label class="chk"><input type="checkbox" id="cChateau"> Ouverture château d'eau</label>
-   </div>
-        </div>
- <label class="f">Date courrier d'accord (si travaux)
-   <input type="date" id="courrier">
- </label>
-        <label class="f">Tél. intervenant en cas de problème
-   <input type="text" id="telPb" list="dlTel">
         </label>
+        <label class="f">Date courrier d'accord (si travaux)
+          <input type="date" id="courrier">
+        </label>
+ <label class="f">Tél. intervenant en cas de problème
+          <input type="text" id="telPb" list="dlTel">
+ </label>
       </div>
-      <div class="warn" id="warn"></div>
-    </div>
+    </section>
 
-    <div class="card">
+    <section class="card adv">
       <h2>Demandeur et intervenants</h2>
       <div class="grid">
-        <label class="f">Opérateur demandeur
-          <input type="text" id="op" value="FREE">
-        </label>
- <label class="f">Entreprise intervenante
-          <input type="text" id="ent" value="FREE">
+ <label class="f">Opérateur demandeur
+   <input type="text" id="op" value="FREE">
  </label>
-        <label class="f full">Responsable (nom, mail, tél.)
-          <input type="text" id="resp" list="dlResp">
+        <label class="f">Entreprise intervenante
+   <input type="text" id="ent" value="FREE">
+        </label>
+ <label class="f full">Responsable (nom, mail, tél.)
+   <input type="text" id="resp" list="dlResp">
         </label>
         <div class="full">
-   <div class="muted" style="margin-bottom:4px">Intervenants (cocher les présents)</div>
-          <div class="people" id="people"></div>
-          <div class="row">
-     <input type="text" id="pName" placeholder="NOM Prénom" style="flex:2;min-width:160px">
+   <div class="lbl" style="margin-top:4px">Intervenants (cocher les présents)</div>
+          <div class="list" id="people"></div>
+   <div class="row">
+            <input type="text" id="pName" placeholder="NOM Prénom" style="flex:2;min-width:160px">
      <input type="text" id="pSoc" placeholder="Société" value="FREE" style="flex:1;min-width:90px">
      <button id="pAdd">＋ Ajouter</button>
-          </div>
- </div>
+   </div>
+        </div>
         <label class="f full">Immatriculation(s) du/des véhicule(s)
-          <input type="text" id="plaque" list="dlPlaque">
+   <input type="text" id="plaque" list="dlPlaque">
         </label>
       </div>
-    </div>
+    </section>
 
-    <div class="card">
+    <section class="card adv">
       <h2>Signature</h2>
       <div class="grid">
-        <label class="chk full"><input type="checkbox" id="sigOn" checked> Ajouter une signature générée à partir du nom</label>
- <label class="f">Signataire
+ <div class="full"><label class="tog"><input type="checkbox" id="sigOn" checked>Ajouter une signature générée à partir du nom</label></div>
+        <label class="f">Signataire
    <select id="sigWho"></select>
-        </label>
+ </label>
         <label class="f">Forme
           <select id="sigStyle">
      <option value="init">Initiale + nom</option>
      <option value="full">Nom complet</option>
-     <option value="paraphe">Paraphe (initiales)</option>
+            <option value="paraphe">Paraphe (initiales)</option>
    </select>
-        </label>
+ </label>
         <label class="f">Écriture
    <select id="sigFont">
      <option>Herr Von Muellerhoff</option>
      <option>Mrs Saint Delafield</option>
-     <option>Great Vibes</option>
-   </select>
- </label>
+            <option>Great Vibes</option>
+          </select>
+        </label>
         <div class="full sigbox"><canvas id="sigCanvas" width="400" height="170"></canvas></div>
       </div>
-    </div>
+    </section>
 
-    <div class="card">
+    <section class="card adv">
       <h2>Mail</h2>
       <div class="grid">
-        <div class="full row" style="gap:16px">
-   <label class="chk"><input type="checkbox" id="cc"> <span id="ccLabel">Copie (cc)</span></label>
-          <label class="chk">Messagerie :
-     <select id="mailApp" style="width:auto">
-       <option value="web">Outlook web</option>
-       <option value="pc">Outlook PC (application)</option>
-     </select>
-   </label>
-        </div>
- <div class="full">
-          <div class="muted" style="margin-bottom:4px">Autres adresses en copie (cocher celles à mettre en copie ; elles restent enregistrées sur ce PC)</div>
-   <div class="people" id="ccList"></div>
+        <label class="f">Messagerie
+   <select id="mailApp">
+     <option value="web">Outlook web</option>
+     <option value="pc">Outlook PC (application)</option>
+   </select>
+        </label>
+        <div style="align-self:end"><label class="tog"><input type="checkbox" id="cc" checked><span id="ccLabel">Copie Vendée Eau</span></label></div>
+        <div class="full">
+   <div class="lbl" style="margin-top:4px">Autres adresses en copie (cocher celles à mettre en copie)</div>
+   <div class="list" id="ccList"></div>
           <div class="row">
      <input type="text" id="ccNew" placeholder="adresse@exemple.fr (plusieurs possibles, séparées par ; )" style="flex:1;min-width:220px">
      <button id="ccAdd">＋ Ajouter</button>
           </div>
  </div>
+        <div class="full muted">Le PDF se télécharge, puis il faut le glisser dans le mail (ni le navigateur ni Outlook web ne peuvent joindre un fichier tout seuls).</div>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="actions">
-        <button class="main" id="genPdf">📄 Générer le PDF</button>
-        <button class="main" id="genMail">✉️ PDF + mail</button>
-        <span id="msg"></span>
-      </div>
-      <p class="muted" style="margin:8px 0 0">Le PDF est téléchargé, puis il faut le glisser dans le mail (ni le navigateur ni Outlook web ne peuvent joindre un fichier tout seuls).</p>
-    </div>
+    </section>
   </div>
 
-  <!-- ===== Administration ===== -->
-  <div class="card">
-    <details id="admBox">
-      <summary>⚙ Administration : créer formulaire.enc</summary>
-      <p class="muted">Tout se fait dans ton navigateur : le PDF n'est envoyé nulle part. Le fichier obtenu est illisible sans le mot de passe.</p>
-      <div class="grid">
-        <div class="full row">
-          <label class="btn">📂 1. Choisir le PDF<input type="file" id="admFile" accept="application/pdf,.pdf" hidden></label>
-   <span id="admInfo" class="muted">Aucun PDF choisi.</span>
- </div>
-        <label class="f full">2. Liste des sites (un par ligne, reprise automatiquement du PDF)
-          <textarea id="admSites" style="min-height:120px"></textarea>
-        </label>
- <label class="f">3. Destinataire du mail
-          <input type="email" id="admTo" placeholder="adresse d'ouverture des sites">
-        </label>
-        <label class="f">Copie (facultatif)
-   <input type="email" id="admCc" placeholder="adresse en copie">
-        </label>
- <label class="f">4. Mot de passe (12 caractères min.)
-          <input type="password" id="admPwd1" autocomplete="new-password">
- </label>
-        <label class="f">Confirmer le mot de passe
-          <input type="password" id="admPwd2" autocomplete="new-password">
- </label>
-        <div class="full row">
-          <button id="admEnc" class="main">🔒 5. Créer formulaire.enc</button>
+  <!-- ===== Outils / administration / journal ===== -->
+  <section class="card">
+    <details id="toolsBox">
+      <summary>Outils, administration et journal</summary>
+      <div class="row" style="margin-top:12px">
+        <button id="relock" class="sm">🔒 Verrouiller ce PC</button>
+        <button id="tplFields" class="sm">🔍 Lister les champs</button>
+      </div>
+      <details id="admBox" class="sub" style="margin-top:12px">
+        <summary>Administration : créer formulaire.enc</summary>
+ <p class="muted">Tout se fait dans ton navigateur : le PDF n'est envoyé nulle part. Le fichier obtenu est illisible sans le mot de passe.</p>
+ <div class="grid">
+          <div class="full row">
+     <label class="btn">📂 1. Choisir le PDF<input type="file" id="admFile" accept="application/pdf,.pdf" hidden></label>
+     <span id="admInfo" class="muted">Aucun PDF choisi.</span>
+   </div>
+          <label class="f full">2. Liste des sites (un par ligne, reprise automatiquement du PDF)
+     <textarea id="admSites" style="min-height:120px"></textarea>
+   </label>
+   <label class="f">3. Destinataire du mail
+     <input type="email" id="admTo" placeholder="adresse d'ouverture des sites">
+   </label>
+   <label class="f">Copie (facultatif)
+     <input type="email" id="admCc" placeholder="adresse en copie">
+          </label>
+          <label class="f">4. Mot de passe (12 caractères min.)
+     <input type="password" id="admPwd1" autocomplete="new-password">
+   </label>
+   <label class="f">Confirmer le mot de passe
+     <input type="password" id="admPwd2" autocomplete="new-password">
+   </label>
+   <div class="full row">
+     <button id="admEnc" class="main">🔒 5. Créer formulaire.enc</button>
+   </div>
         </div>
-      </div>
+      </details>
+      <div class="lbl">Journal</div>
+      <div id="log"></div>
     </details>
-  </div>
+  </section>
+</main>
 
-  <div class="card last">
-    <h2>Journal</h2>
-    <div id="log"></div>
-  </div>
-</div>
+<div id="bar" class="actionbar hidden"><div class="in">
+  <button class="alt" id="genPdf">📄 Générer le PDF</button>
+  <button class="main" id="genMail" title="Télécharge le PDF puis ouvre le mail : il reste à glisser le PDF dedans">✉️ PDF + mail</button>
+  <span id="msg"></span>
+</div></div>
 
 <datalist id="dlDuree"><option>1h</option><option>2h</option><option>3h</option><option>4h</option><option>½ journée</option><option>Journée</option></datalist>
 <datalist id="dlResp"></datalist>
@@ -285,7 +366,7 @@
 'use strict';
 document.getElementById('noJs').remove();
 
-const VERSION = '1.8';
+const VERSION = '1.9';
 const ENC_URL = 'formulaire.enc';          // fichier chiffré, à côté de index.html sur GitHub
 const MAGIC = 'VDE1', PBKDF2_ITER = 600000;
 /* Position de la signature sur la page 2 (en points, A4 = 595 x 842, mesuré depuis le HAUT) */
@@ -294,6 +375,8 @@ const SIG_X = 95, SIG_TOP = 738, SIG_MAXW = 310, SIG_MAXH = 88;
 const OWA_COMPOSE = 'https://outlook.office.com/mail/deeplink/compose';
 /* Séparateur des adresses en copie (Outlook accepte le point-virgule) */
 const CC_SEP = ';';
+/* Forme des codes site : 85000_000 */
+const CODE_RE = /^\d{5}_\d{3}$/;
 
 const $ = id => document.getElementById(id);
 const LS = {
@@ -301,7 +384,7 @@ const LS = {
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
 };
 const K_PRESETS='vde.presets.v1', K_LAST='vde.last.v1', K_PEOPLE='vde.people.v1', K_HIST='vde.hist.v1';
-const K_CCM='vde.ccmails.v1', K_XSITES='vde.sites.extra.v1';
+const K_CCM='vde.ccmails.v1', K_XSITES='vde.sites.extra.v1', K_CUR='vde.preset.cur.v1', K_CCVDE='vde.ccvde.v1';
 
 /* Rien de sensible ici : sites, adresses mail et PDF sont dans formulaire.enc */
 let BASE_SITES = [], SITES = [], MAIL_TO = '', MAIL_CC = '', TPL = null;
@@ -323,7 +406,12 @@ function log(t){
   el.scrollTop = el.scrollHeight;
 }
 function msg(t, color){ const m = $('msg'); m.textContent = t; m.style.color = color || ''; }
-function lockStatus(cls, html){ const s = $('lockStatus'); s.className = 'status ' + (cls || ''); s.innerHTML = html; }
+function lockStatus(cls, html){
+  const s = $('lockStatus'); s.className = 'status ' + (cls || ''); s.innerHTML = html;
+  const p = $('pill'); p.className = 'pill ' + (cls || '');
+  p.textContent = {ok: '🔓 Déverrouillé', err: '⛔ Problème', warn: '🆕 Mise à jour'}[cls] || '🔒 Verrouillé';
+  $('lockCard').classList.toggle('hidden', cls === 'ok');
+}
 function showUnlock(on){ $('unlockBox').classList.toggle('hidden', !on); if(on) setTimeout(() => $('pwd').focus(), 50); }
 window.addEventListener('error', e => log('❌ Erreur : ' + e.message));
 window.addEventListener('unhandledrejection', e => log('❌ Erreur : ' + (e.reason && e.reason.message || e.reason)));
@@ -400,30 +488,38 @@ function readOptions(form, name){
 
 /* ---------- sites (liste officielle + châteaux d'eau ajoutés) ---------- */
 let xSites = LS.get(K_XSITES, []);
+/* Découpe « 85000_000 - NOM » (code en premier) ou « NOM - 85000_000 » (code à la fin) */
 function siteParts(s){
-  const m = String(s).match(/^\s*(\d{5})(\s*[-–:]?\s*)(.*)$/);
-  return m ? {code: m[1], sep: m[2], name: m[3].trim()} : null;
+  s = String(s).trim();
+  let m = s.match(/^(\d{5}(?:_\d{1,4})?)([\s\-–:\/]*)(.+)$/);
+  if(m) return {code: m[1], sep: m[2], name: m[3].trim(), first: true};
+  m = s.match(/^(.+?)([\s\-–:\/]*)(\d{5}(?:_\d{1,4})?)$/);
+  if(m) return {code: m[3], sep: m[2], name: m[1].trim(), first: false};
+  return null;
 }
-/* Disposition des noms : séparateur entre code et nom, majuscules ou non */
+/* Disposition des noms de la liste officielle : position du code, séparateur, majuscules */
 function siteModel(){
   const parts = BASE_SITES.map(siteParts).filter(Boolean);
-  const cnt = {}; parts.forEach(p => { cnt[p.sep] = (cnt[p.sep] || 0) + 1; });
+  const nFirst = parts.filter(p => p.first).length;
+  const first = nFirst >= parts.length - nFirst;
+  const cnt = {};
+  parts.filter(p => p.first === first).forEach(p => { cnt[p.sep] = (cnt[p.sep] || 0) + 1; });
   const seps = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a]);
-  const sep = seps.length ? seps[0] : ' ';
+  const sep = (seps.length ? seps[0] : ' ') || ' ';
   const letters = parts.map(p => p.name.replace(/[^\p{L}]/gu, '')).join('');
-  return {sep: sep || ' ', upper: !!letters && letters === letters.toUpperCase()};
+  return {first, sep, upper: !!letters && letters === letters.toUpperCase()};
 }
 function formatSite(code, name){
   const md = siteModel();
   name = String(name || '').trim().replace(/\s+/g, ' ');
   if(md.upper) name = name.toUpperCase();
-  return (code + md.sep + name).trim();
+  if(!name) return code; if(!code) return name;
+  return md.first ? code + md.sep + name : name + md.sep + code;
 }
 /* Ordre de la liste officielle : par code, par nom, alphabétique, ou non reconnu */
 function orderMode(list){
   if(list.length < 2) return 'code';
-  const ps = list.map(siteParts);
-  const all = ps.every(Boolean);
+  const all = list.map(siteParts).every(Boolean);
   const sorted = cmp => list.every((s, i) => i === 0 || cmp(list[i-1], s) <= 0);
   if(all && sorted(cmpBy('code'))) return 'code';
   if(all && sorted(cmpBy('name'))) return 'name';
@@ -462,7 +558,7 @@ function renderXSites(){
   const box = $('nsList'); box.innerHTML = '';
   if(!xSites.length){ box.innerHTML = '<div class="muted">Aucun.</div>'; return; }
   xSites.forEach((s, i) => {
-    const row = document.createElement('div'); row.className = 'person';
+    const row = document.createElement('div'); row.className = 'item';
     const sp = document.createElement('span'); sp.textContent = s;
     if(BASE_SITES.some(x => coll.compare(x, s) === 0)) sp.textContent += '  (désormais dans la liste officielle)';
     const del = document.createElement('button'); del.textContent = '×'; del.title = 'Retirer ce site';
@@ -471,10 +567,16 @@ function renderXSites(){
     row.append(sp, del); box.appendChild(row);
   });
 }
+/* Code site : chiffres uniquement, « _ » ajouté automatiquement après le 5e chiffre */
+function fmtCode(v){
+  const d = String(v).replace(/\D/g, '').slice(0, 8);
+  return d.length > 5 ? d.slice(0, 5) + '_' + d.slice(5) : d;
+}
 function nsAuto(){
-  const code = $('nsCode').value.replace(/\D/g, '').slice(0, 5), name = $('nsName').value;
-  $('nsCode').value = code;
-  $('nsFinal').value = (code || name.trim()) ? formatSite(code, name) : '';
+  const raw = $('nsCode').value, code = fmtCode(raw), name = $('nsName').value;
+  if(code !== raw) $('nsCode').value = code;
+  const hasCode = code.length > 2;
+  $('nsFinal').value = (hasCode || name.trim()) ? formatSite(hasCode ? code : '', name) : '';
   nsPreview();
 }
 function nsPreview(){
@@ -493,10 +595,11 @@ $('nsName').addEventListener('input', nsAuto);
 $('nsFinal').addEventListener('input', nsPreview);
 $('nsAdd').onclick = () => {
   const f = $('nsFinal').value.trim().replace(/\s+/g, ' ');
-  if(!f){ alert('Renseigne le code et le nom du site.'); return; }
+  if(!f){ alert('Renseigne le code site et le nom.'); return; }
   const p = siteParts(f);
-  if(!p && !confirm('« '+f+' » ne commence pas par un code à 5 chiffres comme les autres sites. Ajouter quand même ?')) return;
   if(p && !p.name){ alert('Il manque le nom du site.'); return; }
+  if((!p || !CODE_RE.test(p.code)) &&
+     !confirm('« '+f+' » ne contient pas de code site de la forme 85000_000. Ajouter quand même ?')) return;
   if(SITES.some(x => coll.compare(x, f) === 0)){ alert('Ce site est déjà dans la liste.'); return; }
   if(p){
     const same = SITES.filter(x => { const q = siteParts(x); return q && q.code === p.code; });
@@ -504,7 +607,7 @@ $('nsAdd').onclick = () => {
   }
   xSites.push(f); LS.set(K_XSITES, xSites);
   rebuildSites(f); saveLast();
-  $('nsCode').value = ''; $('nsName').value = ''; $('nsFinal').value = ''; nsPreview();
+  $('nsCode').value = '85'; $('nsName').value = ''; $('nsFinal').value = ''; nsPreview();
   log('Château d\'eau ajouté : ' + f);
 };
 
@@ -531,7 +634,7 @@ function renderPeople(){
   const box = $('people'); box.innerHTML = '';
   if(!people.length){ box.innerHTML = '<div class="muted">Aucun intervenant : ajoute-toi ci-dessous (puis 💾 pour le garder dans un préréglage).</div>'; }
   people.forEach((p, i) => {
-    const row = document.createElement('label'); row.className = 'person';
+    const row = document.createElement('label'); row.className = 'item';
     const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = checked.has(p.n);
     cb.onchange = () => { cb.checked ? checked.add(p.n) : checked.delete(p.n); refreshSigWho(); saveLast(); };
     const sp = document.createElement('span'); sp.textContent = p.n + ' / ' + p.s;
@@ -559,7 +662,7 @@ function renderCc(){
   const box = $('ccList'); box.innerHTML = '';
   if(!ccMails.length){ box.innerHTML = '<div class="muted">Aucune adresse enregistrée.</div>'; return; }
   ccMails.forEach((m, i) => {
-    const row = document.createElement('label'); row.className = 'person';
+    const row = document.createElement('label'); row.className = 'item';
     const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = ccChecked.has(m);
     cb.onchange = () => { cb.checked ? ccChecked.add(m) : ccChecked.delete(m); saveLast(); };
     const sp = document.createElement('span'); sp.textContent = m;
@@ -583,6 +686,8 @@ $('ccAdd').onclick = () => {
   log('Adresse(s) en copie ajoutée(s) : ' + parts.join(', '));
 };
 $('ccNew').addEventListener('keydown', e => { if(e.key === 'Enter') $('ccAdd').click(); });
+/* Copie Vendée Eau : cochée par défaut, réglage gardé sur le PC (indépendant des préréglages) */
+$('cc').addEventListener('change', () => { LS.set(K_CCVDE, $('cc').checked); });
 function ccAddresses(){
   const l = [];
   const add = m => { if(m && !sameMail(m, MAIL_TO) && !l.some(x => sameMail(x, m))) l.push(m); };
@@ -616,7 +721,7 @@ function checkDate(){
 $('date').addEventListener('change', checkDate);
 
 /* ---------- état / préréglages ---------- */
-const FIELDS = ['site','heure','duree','objet','cPortail','cPortillon','cChateau','telPb','op','ent','resp','plaque','sigOn','sigWho','sigStyle','sigFont','cc','mailApp'];
+const FIELDS = ['site','heure','duree','objet','cPortail','cPortillon','cChateau','telPb','op','ent','resp','plaque','sigOn','sigWho','sigStyle','sigFont','mailApp'];
 function getState(){
   const s = {};
   FIELDS.forEach(id => { const el = $(id); s[id] = el.type === 'checkbox' ? el.checked : el.value; });
@@ -636,34 +741,60 @@ function applyState(s){
   if(!$('mailApp').value) $('mailApp').value = 'web';
   renderSig();
 }
-function saveLast(){ if(uiReady) LS.set(K_LAST, getState()); }
+function saveLast(){ if(uiReady){ LS.set(K_LAST, getState()); renderSummary(); } }
 document.addEventListener('input', e => { if(e.target.closest('#app')) saveLast(); });
 document.addEventListener('change', e => { if(e.target.closest('#app')) saveLast(); });
 
+/* ---------- mode réduit (après choix d'un préréglage) ---------- */
+function isCompact(){ return document.body.classList.contains('compact'); }
+function setCompact(on){ document.body.classList.toggle('compact', !!on); renderSummary(); }
+function renderSummary(){
+  const n = $('preset').value;
+  $('summary').classList.toggle('hidden', !n);
+  if(!n){ document.body.classList.remove('compact'); return; }
+  $('toggleView').textContent = isCompact() ? '✏️ Tout afficher' : '▴ Réduire';
+  const pres = people.filter(p => checked.has(p.n)).map(p => p.n);
+  const nCc = ccAddresses().length;
+  const items = [
+    ['📍', $('site').value || '—'],
+    ['👷', pres.join(', ') || 'aucun intervenant coché'],
+    ['🚗', $('plaque').value.trim()],
+    ['✉️', ($('mailApp').value === 'pc' ? 'Outlook PC' : 'Outlook web') + (nCc ? ' · ' + nCc + ' en copie' : ' · sans copie')]
+  ].filter(x => x[1]);
+  $('sumText').innerHTML = items.map(([i, t]) => '<span>' + i + ' ' + esc(t) + '</span>').join('');
+}
+$('toggleView').onclick = () => setCompact(!isCompact());
+
 function renderPresets(sel){
   const ps = LS.get(K_PRESETS, {});
-  $('preset').innerHTML = '<option value="">— préréglage —</option>' +
-    Object.keys(ps).sort().map(n => '<option>'+esc(n)+'</option>').join('');
-  if(sel) $('preset').value = sel;
+  $('preset').innerHTML = '<option value="">— Aucun préréglage —</option>' +
+    Object.keys(ps).sort(coll.compare).map(n => '<option>'+esc(n)+'</option>').join('');
+  if(sel && sel in ps) $('preset').value = sel;
 }
 $('preset').onchange = () => {
-  const n = $('preset').value; if(!n) return;
-  applyState(LS.get(K_PRESETS, {})[n]); saveLast(); log('Préréglage chargé : '+n);
+  const n = $('preset').value;
+  LS.set(K_CUR, n);
+  if(!n){ setCompact(false); return; }
+  applyState(LS.get(K_PRESETS, {})[n]); saveLast(); setCompact(true);
+  log('Préréglage chargé : '+n);
 };
 $('pSave').onclick = () => {
   const n = (prompt('Nom du préréglage :', $('preset').value || '') || '').trim(); if(!n) return;
   const ps = LS.get(K_PRESETS, {}); ps[n] = getState(); LS.set(K_PRESETS, ps); renderPresets(n);
+  LS.set(K_CUR, n); setCompact(true);
   log('Préréglage enregistré : '+n);
 };
 $('pRename').onclick = () => {
   const old = $('preset').value; if(!old) return;
   const n = (prompt('Nouveau nom :', old) || '').trim(); if(!n || n === old) return;
   const ps = LS.get(K_PRESETS, {}); ps[n] = ps[old]; delete ps[old]; LS.set(K_PRESETS, ps); renderPresets(n);
+  LS.set(K_CUR, n); renderSummary();
   log('Préréglage renommé : '+old+' → '+n);
 };
 $('pDel').onclick = () => {
   const n = $('preset').value; if(!n || !confirm('Supprimer le préréglage « '+n+' » ?')) return;
   const ps = LS.get(K_PRESETS, {}); delete ps[n]; LS.set(K_PRESETS, ps); renderPresets();
+  LS.set(K_CUR, ''); setCompact(false);
   log('Préréglage supprimé : '+n);
 };
 
@@ -671,11 +802,13 @@ $('pDel').onclick = () => {
 $('pExport').onclick = () => {
   const data = {
     app: 'das-vendee', type: 'reglages', v: 1, version: VERSION, exported: new Date().toISOString(),
-    presets: LS.get(K_PRESETS, {}), people, hist, ccMails, extraSites: xSites, last: getState()
+    presets: LS.get(K_PRESETS, {}), people, hist, ccMails, extraSites: xSites, last: getState(),
+    ccVde: $('cc').checked, current: $('preset').value
   };
   const name = 'das-vendee-reglages_' + isoDate(new Date()) + '.json';
   download(new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'}), name);
   log('⬇ Réglages exportés : ' + name + ' (' + Object.keys(data.presets).length + ' préréglage(s)).');
+  msg('⬇ Réglages exportés : ' + name, 'var(--ok)');
 };
 $('pImport').addEventListener('change', async e => {
   const f = e.target.files[0]; e.target.value = ''; if(!f) return;
@@ -704,12 +837,17 @@ $('pImport').addEventListener('change', async e => {
       s = String(s).trim(); if(s && !xSites.some(x => coll.compare(x, s) === 0)){ xSites.push(s); nS++; }
     });
     LS.set(K_XSITES, xSites);
+    if(typeof d.ccVde === 'boolean' && !$('cc').disabled){ $('cc').checked = d.ccVde; LS.set(K_CCVDE, d.ccVde); }
     rebuildSites();
-    renderPresets();
-    if(d.last && confirm('Reprendre aussi le dernier formulaire saisi sur l\'autre PC ?')){ applyState(d.last); checkDate(); }
+    renderPresets($('preset').value);
+    if(d.last && confirm('Reprendre aussi le dernier formulaire saisi sur l\'autre PC ?')){
+      applyState(d.last); checkDate();
+      if(d.current && d.current in ps){ $('preset').value = d.current; LS.set(K_CUR, d.current); setCompact(true); }
+    }
     else { renderPeople(); refreshSigWho(); renderCc(); }
-    saveLast();
+    saveLast(); renderSummary();
     log('⬆ Réglages importés : ' + Object.keys(inc).length + ' préréglage(s), ' + nP + ' intervenant(s), ' + nM + ' adresse(s), ' + nS + ' site(s) ajouté(s).');
+    msg('⬆ Réglages importés', 'var(--ok)');
   }catch(err){ alert('Import impossible : ' + err.message); log('⛔ Import : ' + err.message); }
 });
 
@@ -765,13 +903,15 @@ async function applyBundle(b){
   (s.people || []).forEach(p => { if(p && p.n && !people.some(x => x.n === p.n)){ people.push({n: p.n, s: p.s || 'FREE'}); added++; } });
   if(added) LS.set(K_PEOPLE, people);
 
+  /* Copie Vendée Eau : active par défaut, désactivable */
   $('ccLabel').textContent = MAIL_CC ? 'Copie à ' + MAIL_CC : 'Copie Vendée Eau (aucune adresse définie)';
   $('cc').disabled = !MAIL_CC;
+  $('cc').checked = !!MAIL_CC && LS.get(K_CCVDE, true) !== false;
 
   const keep = uiReady ? $('site').value : (LS.get(K_LAST, {}) || {}).site;
   rebuildSites(keep || '');
   if(!uiReady){
-    renderPresets(); renderPeople(); renderCc();
+    renderPeople(); renderCc();
     const last = LS.get(K_LAST, null);
     if(last) applyState(last);
     else {
@@ -780,11 +920,15 @@ async function applyBundle(b){
       $('resp').value = hist.resp[0] || ''; $('plaque').value = hist.plaque[0] || ''; $('telPb').value = hist.tel[0] || '';
       refreshSigWho();
     }
+    const cur = LS.get(K_CUR, '');
+    renderPresets(cur);
     uiReady = true;
     setDate(10);
     $('courrier').value = '';
-  } else { renderPeople(); refreshSigWho(); renderCc(); }
+    setCompact(!!$('preset').value);
+  } else { renderPeople(); refreshSigWho(); renderCc(); renderSummary(); }
   $('app').classList.remove('hidden');
+  $('bar').classList.remove('hidden');
   if(!MAIL_TO) log('⚠ Aucune adresse destinataire dans formulaire.enc : le mail s\'ouvrira sans destinataire.');
   log('Formulaire prêt : ' + BASE_SITES.length + ' site(s)' + (xSites.length ? ' + ' + xSites.length + ' ajouté(s)' : '') + (added ? ', ' + added + ' intervenant(s) ajouté(s)' : '') + '.');
 }
@@ -820,7 +964,7 @@ async function boot(){
     showUnlock(true); return;
   }
   if(!encBytes){
-    lockStatus('err', '🟥 <b>Aucun formulaire disponible</b> : formulaire.enc est absent du site (voir ⚙ Administration).');
+    lockStatus('err', '🟥 <b>Aucun formulaire disponible</b> : formulaire.enc est absent du site (voir Outils → Administration).');
     return;
   }
   lockStatus('', '🔒 <b>Formulaire protégé</b> : tape le mot de passe (une seule fois sur ce PC).');
@@ -922,17 +1066,17 @@ function collect(){
   if(!date) errs.push('date');
   if(!pres.length) errs.push('au moins un intervenant coché');
   if(!$('cPortail').checked && !$('cPortillon').checked && !$('cChateau').checked) errs.push('nature de l\'intervention');
-  if(errs.length) throw new Error('Manque : ' + errs.join(', '));
+  if(errs.length){ const e = new Error('Manque : ' + errs.join(', ')); e.missing = true; throw e; }
   const dt = parseIso(date), now = new Date();
   const sp = siteParts(site);
-  const m = sp ? null : site.match(/\b(\d{5})\s+(.+)$/);
+  const m = sp ? null : site.match(/\b(\d{5}(?:_\d+)?)\b/);
   const days = Math.round((dt - addDays(0)) / 864e5);
   let courrierTxt = '';
   if($('courrier').value){ const c = parseIso($('courrier').value); courrierTxt = pad(c.getDate())+'/'+pad(c.getMonth()+1)+'/'+c.getFullYear(); }
   return {
     site,
-    siteCode: sp ? sp.code : (m ? m[1] : site.split(' ')[0]),
-    city: sp ? sp.name : (m ? m[2].trim() : ''),
+    siteCode: sp ? sp.code : (m ? m[1] : ''),
+    city: sp ? sp.name : site,
     dateTxt: dt.getDate()+'/'+(dt.getMonth()+1)+'/'+dt.getFullYear()+' '+heure,
     dateMail: pad(dt.getDate())+'/'+pad(dt.getMonth()+1)+'/'+dt.getFullYear(),
     heure, year: dt.getFullYear(), urgent: days < 10,
@@ -962,7 +1106,7 @@ async function fillTemplate(d, sig){
       else if(f instanceof PDFDropdown){
         const val = clean(v);
         if(!val){ f.clear(); return; }
- if(!f.getOptions().includes(val)) f.enableEditing();
+        if(!f.getOptions().includes(val)) f.enableEditing();
         f.select(val);
       }
       else if(f instanceof PDFOptionList){ if(f.getOptions().includes(v)) f.select(v); }
@@ -1000,8 +1144,8 @@ async function fillTemplate(d, sig){
 
 /* ---------- génération ---------- */
 function openMail(d, fileName, win){
-  /* Objet : code du site en premier */
-  const subject = d.siteCode + (d.city ? ' ' + d.city : '') + ' - Demande d\'ouverture - ' + d.dateMail + ' ' + d.heure + (d.urgent ? ' - URGENT' : '');
+  /* Objet : code site en premier */
+  const subject = (d.siteCode ? d.siteCode + ' ' : '') + d.city + ' - Demande d\'ouverture - ' + d.dateMail + ' ' + d.heure + (d.urgent ? ' - URGENT' : '');
   const acces = [d.portail && 'ouverture portail', d.portillon && 'accès baie par portillon', d.chateau && 'ouverture château d\'eau'].filter(Boolean).join(', ');
   /* Pas de « Cordialement » ni de nom : la signature Outlook s'ajoute d'elle-même */
   const lines = [
@@ -1049,7 +1193,7 @@ async function generate(withMail){
   try{
     if(!TPL) throw new Error('Formulaire non déverrouillé (voir l\'encadré « Accès »).');
     const d = collect();
-    msg('Génération…', 'var(--c2)');
+    msg('Génération…', 'var(--acc2)');
     await ensurePdfLib();
     const sig = $('sigOn').checked ? await renderSig() : null;
     const bytes = await fillTemplate(d, sig);
@@ -1060,10 +1204,11 @@ async function generate(withMail){
     if(withMail){
       const ccList = openMail(d, fileName, win);
       log('✉️ Mail préparé' + (MAIL_TO ? ' vers ' + MAIL_TO : '') + (ccList.length ? ' (cc ' + ccList.join(', ') + ')' : '') + ' : glisse le PDF dedans.');
-    }
-    msg('✅ ' + fileName, 'var(--ok)');
+      msg('✅ ' + fileName + ' : glisse-le dans le mail', 'var(--ok)');
+    } else msg('✅ ' + fileName, 'var(--ok)');
   }catch(e){
     if(win && !win.closed) try{ win.close(); }catch(_){}
+    if(e.missing && isCompact()) setCompact(false);   // on déplie pour montrer ce qui manque
     msg('⛔ ' + e.message, 'var(--err)'); log('⛔ ' + e.message);
   }finally{ btns.forEach(b => b.disabled = false); }
 }
