@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#6366f1">
-<title>DAS Vendée Eau v1.11</title>
+<title>DAS Vendée Eau v1.12</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Great+Vibes&family=Herr+Von+Muellerhoff&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
@@ -172,7 +172,7 @@
   <div class="brand"><b>DAS Vendée Eau</b><small>Demande d'ouverture de réservoir</small></div>
   <span class="sp"></span>
   <span id="pill" class="pill">Démarrage…</span>
-  <span class="ver">v1.11</span>
+  <span class="ver">v1.12</span>
 </div></header>
 
 <main class="wrap">
@@ -229,7 +229,7 @@
    <select id="heure"></select>
  </label>
         <label class="f">Durée
-          <input type="text" id="duree" list="dlDuree" placeholder="2h">
+          <select id="duree"></select>
  </label>
       </div>
       <div class="chips" style="margin-top:12px">
@@ -406,7 +406,6 @@
   <span id="msg"></span>
 </div></div>
 
-<datalist id="dlDuree"><option>1h</option><option>2h</option><option>3h</option><option>4h</option><option>½ journée</option><option>Journée</option></datalist>
 <datalist id="dlResp"></datalist>
 <datalist id="dlTel"></datalist>
 <datalist id="dlPlaque"></datalist>
@@ -416,7 +415,7 @@
 'use strict';
 document.getElementById('noJs').remove();
 
-const VERSION = '1.11';
+const VERSION = '1.12';
 const ENC_URL = 'formulaire.enc';          // fichier chiffré, à côté de index.html sur GitHub
 const MAGIC = 'VDE1', PBKDF2_ITER = 600000;
 /* Position de la signature sur la page 2 (en points, A4 = 595 x 842, mesuré depuis le HAUT) */
@@ -535,6 +534,10 @@ function readOptions(form, name){
   for(let h = 6; h <= 20; h++) for(const m of [0,15,30,45]){ if(h === 20 && m) break; o.push(pad(h)+':'+pad(m)); }
   $('heure').innerHTML = o.map(x => '<option>'+x+'</option>').join('');
 }
+/* ---------- durées : 30 min puis toutes les heures jusqu'à 8h ---------- */
+const DUREES = ['30 min','1h','2h','3h','4h','5h','6h','7h','8h'];
+$('duree').innerHTML = DUREES.map(x => '<option>'+x+'</option>').join('');
+$('duree').value = '2h';
 
 /* ---------- sites (liste officielle + châteaux d'eau ajoutés) ---------- */
 let xSites = LS.get(K_XSITES, []);
@@ -794,6 +797,8 @@ function applyState(s){
     if(el.type === 'checkbox'){ if(!el.disabled) el.checked = !!s[id]; } else el.value = s[id]; });
   if(!$('site').value && SITES.length) $('site').selectedIndex = 0;
   if(!$('heure').value) $('heure').value = '09:00';
+  /* anciennes durées (« ½ journée », « Journée »…) absentes de la nouvelle liste */
+  if(!DUREES.includes($('duree').value)) $('duree').value = '2h';
   if(!$('mailApp').value) $('mailApp').value = 'web';
   renderSig();
 }
