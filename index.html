@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#6366f1">
-<title>DAS Vendée Eau v1.14</title>
+<title>DAS Vendée Eau v1.15</title>
 <!-- Logo de l'onglet / des favoris (goutte d'eau sur dégradé), intégré : aucun fichier à ajouter -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2306b6d4'/%3E%3Cstop offset='.52' stop-color='%236366f1'/%3E%3Cstop offset='1' stop-color='%23d946ef'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Cpath d='M32 10C32 10 17 27 17 38a15 15 0 0 0 30 0C47 27 32 10 32 10z' fill='white'/%3E%3Cpath d='M25 38a7 7 0 0 0 7 7' fill='none' stroke='%236366f1' stroke-width='3.5' stroke-linecap='round' opacity='.55'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -177,7 +177,7 @@
   <div class="brand"><b>DAS Vendée Eau</b><small>Demande d'ouverture de réservoir</small></div>
   <span class="sp"></span>
   <span id="pill" class="pill">Démarrage…</span>
-  <span class="ver">v1.14</span>
+  <span class="ver">v1.15</span>
 </div></header>
 
 <main class="wrap">
@@ -370,7 +370,9 @@
       <div class="row" style="margin-top:12px">
  <button id="relock" class="sm">🔒 Verrouiller ce PC</button>
         <button id="tplFields" class="sm">🔍 Lister les champs</button>
+        <button id="noStats" class="sm">📊 Ne pas compter ce PC</button>
       </div>
+      <p class="muted" style="margin:10px 0 0">📊 Statistiques anonymes d'utilisation (GoatCounter) : visites et actions (PDF, mail, préréglages…). Aucun nom, site, adresse mail ni contenu du formulaire n'est envoyé.</p>
       <details id="admBox" class="sub" style="margin-top:12px">
         <summary>Administration : créer formulaire.enc</summary>
         <p class="muted">Tout se fait dans ton navigateur : le PDF n'est envoyé nulle part. Le fichier obtenu est illisible sans le mot de passe.</p>
@@ -429,7 +431,7 @@
 'use strict';
 document.getElementById('noJs').remove();
 
-const VERSION = '1.14';
+const VERSION = '1.15';
 const ENC_URL = 'formulaire.enc';          // fichier chiffré, à côté de index.html sur GitHub
 const MAGIC = 'VDE1', PBKDF2_ITER = 600000;
 /* Position de la signature sur la page 2 (en points, A4 = 595 x 842, mesuré depuis le HAUT) */
@@ -448,6 +450,26 @@ const LS = {
 };
 const K_PRESETS='vde.presets.v1', K_LAST='vde.last.v1', K_PEOPLE='vde.people.v1', K_HIST='vde.hist.v1';
 const K_CCM='vde.ccmails.v1', K_XSITES='vde.sites.extra.v1', K_CUR='vde.preset.cur.v1', K_CCVDE='vde.ccvde.v1';
+
+/* ---------- statistiques anonymes (GoatCounter) ----------
+   Envoi direct au compteur, sans charger le script externe count.js (la page contient le PDF déchiffré).
+   Jamais envoyé : noms, sites, adresses mail, plaques, téléphones, texte du formulaire. */
+const GC_URL = 'https://das-vendee.goatcounter.com/count';
+const K_NOSTAT = 'vde.nostats.v1';
+function statsOff(){ return LS.get(K_NOSTAT, false) === true || location.protocol !== 'https:'; }
+function gcSend(params){
+  if(statsOff()) return;
+  try{
+    const all = Object.assign({
+      s: [screen.width, screen.height, window.devicePixelRatio || 1].join(','),
+      rnd: Math.random().toString(36).slice(2)
+    }, params);
+    const url = GC_URL + '?' + Object.keys(all).map(k => k + '=' + encodeURIComponent(all[k])).join('&');
+    if(!(navigator.sendBeacon && navigator.sendBeacon(url))){ const i = new Image(); i.src = url; }
+  }catch(e){}
+}
+function trackView(){ gcSend({p: '/', t: 'DAS Vendée Eau', r: document.referrer || ''}); }
+function track(name){ gcSend({p: name, t: name, e: 'true'}); }
 
 /* Rien de sensible ici : sites, adresses mail et PDF sont dans formulaire.enc */
 let BASE_SITES = [], SITES = [], MAIL_TO = '', MAIL_CC = '', TPL = null;
@@ -630,7 +652,7 @@ function renderXSites(){
     if(BASE_SITES.some(x => coll.compare(x, s) === 0)) sp.textContent += '  (désormais dans la liste officielle)';
     const del = document.createElement('button'); del.textContent = '×'; del.title = 'Retirer ce site';
     del.onclick = () => { if(!confirm('Retirer « '+s+' » de la liste ?')) return;
-      xSites.splice(i, 1); LS.set(K_XSITES, xSites); rebuildSites(); saveLast(); log('Site retiré : '+s); };
+      xSites.splice(i, 1); LS.set(K_XSITES, xSites); rebuildSites(); saveLast(); log('Site retiré : '+s); track('site/chateau-eau-retire'); };
     row.append(sp, del); box.appendChild(row);
   });
 }
@@ -682,6 +704,7 @@ $('nsAdd').onclick = () => {
   rebuildSites(f); saveLast();
   $('nsCode').value = '85'; $('nsName').value = ''; $('nsFinal').value = ''; nsPreview();
   log('Château d\'eau ajouté : ' + f);
+  track('site/chateau-eau-ajoute');
 };
 
 /* ---------- intervenants / historique ---------- */
@@ -724,6 +747,7 @@ $('pAdd').onclick = () => {
   checked.add(n); LS.set(K_PEOPLE, people);
   $('pName').value = ''; renderPeople(); refreshSigWho(); saveLast();
   log('Intervenant ajouté : '+n+' / '+s);
+  track('reglage/intervenant-ajoute');
 };
 $('pName').addEventListener('keydown', e => { if(e.key === 'Enter') $('pAdd').click(); });
 
@@ -757,6 +781,7 @@ $('ccAdd').onclick = () => {
   });
   LS.set(K_CCM, ccMails); $('ccNew').value = ''; renderCc(); saveLast();
   log('Adresse(s) en copie ajoutée(s) : ' + parts.join(', '));
+  track('reglage/adresse-copie-ajoutee');
 };
 $('ccNew').addEventListener('keydown', e => { if(e.key === 'Enter') $('ccAdd').click(); });
 /* Copie Vendée Eau : cochée par défaut, réglage gardé sur le PC (indépendant des préréglages) */
@@ -838,7 +863,7 @@ function renderSummary(){
   ].filter(x => x[1]);
   $('sumText').innerHTML = items.map(([i, t]) => '<span>' + i + ' ' + esc(t) + '</span>').join('');
 }
-$('toggleView').onclick = () => setCompact(!isCompact());
+$('toggleView').onclick = () => { setCompact(!isCompact()); track(isCompact() ? 'affichage/reduire' : 'affichage/tout-afficher'); };
 
 function renderPresets(sel){
   const ps = LS.get(K_PRESETS, {});
@@ -854,6 +879,7 @@ $('preset').onchange = () => {
   const st = Object.assign({}, LS.get(K_PRESETS, {})[n] || {}); delete st.site;
   applyState(st); saveLast(); setCompact(true);
   log('Préréglage chargé : '+n);
+  track('prereglage/charge');
 };
 $('pSave').onclick = () => {
   const n = (prompt('Nom du préréglage :', $('preset').value || '') || '').trim(); if(!n) return;
@@ -862,6 +888,7 @@ $('pSave').onclick = () => {
   const ps = LS.get(K_PRESETS, {}); ps[n] = st; LS.set(K_PRESETS, ps); renderPresets(n);
   LS.set(K_CUR, n); setCompact(true);
   log('Préréglage enregistré : '+n);
+  track('prereglage/enregistre');
 };
 $('pRename').onclick = () => {
   const old = $('preset').value; if(!old) return;
@@ -869,12 +896,14 @@ $('pRename').onclick = () => {
   const ps = LS.get(K_PRESETS, {}); ps[n] = ps[old]; delete ps[old]; LS.set(K_PRESETS, ps); renderPresets(n);
   LS.set(K_CUR, n); renderSummary();
   log('Préréglage renommé : '+old+' → '+n);
+  track('prereglage/renomme');
 };
 $('pDel').onclick = () => {
   const n = $('preset').value; if(!n || !confirm('Supprimer le préréglage « '+n+' » ?')) return;
   const ps = LS.get(K_PRESETS, {}); delete ps[n]; LS.set(K_PRESETS, ps); renderPresets();
   LS.set(K_CUR, ''); setCompact(false);
   log('Préréglage supprimé : '+n);
+  track('prereglage/supprime');
 };
 
 /* ---------- export / import des réglages (changement de PC) ---------- */
@@ -888,6 +917,7 @@ $('pExport').onclick = () => {
   download(new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'}), name);
   log('⬇ Réglages exportés : ' + name + ' (' + Object.keys(data.presets).length + ' préréglage(s)).');
   msg('⬇ Réglages exportés : ' + name, 'var(--ok)');
+  track('reglages/export');
 };
 $('pImport').addEventListener('change', async e => {
   const f = e.target.files[0]; e.target.value = ''; if(!f) return;
@@ -927,7 +957,8 @@ $('pImport').addEventListener('change', async e => {
     saveLast(); renderSummary();
     log('⬆ Réglages importés : ' + Object.keys(inc).length + ' préréglage(s), ' + nP + ' intervenant(s), ' + nM + ' adresse(s), ' + nS + ' site(s) ajouté(s).');
     msg('⬆ Réglages importés', 'var(--ok)');
-  }catch(err){ alert('Import impossible : ' + err.message); log('⛔ Import : ' + err.message); }
+    track('reglages/import');
+  }catch(err){ alert('Import impossible : ' + err.message); log('⛔ Import : ' + err.message); track('erreur/import'); }
 });
 
 /* ---------- signature ---------- */
@@ -1016,6 +1047,7 @@ async function applyBundle(b){
 async function boot(){
   renderHist();
   log('DAS Vendée Eau v' + VERSION + ' : page prête.');
+  trackView(); track('version/' + VERSION);
   if(!window.crypto || !crypto.subtle){
     lockStatus('err', '⛔ Chiffrement indisponible : ouvre la page avec le lien <b>https</b> de GitHub, pas depuis ton disque.');
     return;
@@ -1036,17 +1068,21 @@ async function boot(){
   }
   if(cached && (!encHash || cached.hash === encHash)){
     lockStatus('ok', '🟩 <b>Formulaire déverrouillé</b> sur ce PC.');
+    track('acces/deja-deverrouille');
     return;
   }
   if(cached && encHash){
     lockStatus('warn', '🆕 <b>Nouvelle version du formulaire</b> en ligne : tape le mot de passe pour la récupérer (l\'ancienne reste utilisable en attendant).');
+    track('acces/nouvelle-version-a-recuperer');
     showUnlock(true); return;
   }
   if(!encBytes){
     lockStatus('err', '🟥 <b>Aucun formulaire disponible</b> : formulaire.enc est absent du site (voir Outils → Administration).');
+    track('erreur/formulaire-enc-absent');
     return;
   }
   lockStatus('', '🔒 <b>Formulaire protégé</b> : tape le mot de passe (une seule fois sur ce PC).');
+  track('acces/premiere-visite-ou-pc-verrouille');
   showUnlock(true);
 }
 async function unlock(){
@@ -1062,9 +1098,11 @@ async function unlock(){
     lockStatus('ok', '🟩 <b>Formulaire déverrouillé</b> et mémorisé sur ce PC.');
     showUnlock(false);
     log('🔓 Déverrouillé.');
+    track('acces/deverrouillage-mot-de-passe');
   }catch(e){
     lockStatus('err', '⛔ ' + esc(e.message));
     log('⛔ ' + e.message);
+    track(e.message === 'Mot de passe incorrect.' ? 'acces/mot-de-passe-refuse' : 'erreur/dechiffrement');
     showUnlock(true);
   }finally{ $('unlockBtn').disabled = false; }
 }
@@ -1072,9 +1110,20 @@ $('unlockBtn').onclick = unlock;
 $('pwd').addEventListener('keydown', e => { if(e.key === 'Enter') unlock(); });
 $('relock').onclick = async () => {
   if(!confirm('Effacer le formulaire mémorisé sur ce PC ? (Les préréglages sont conservés, il faudra retaper le mot de passe.)')) return;
+  track('action/verrouillage-pc');
   try{ await IDB.del('bundle'); }catch(e){}
   location.reload();
 };
+/* Exclure ses propres visites des statistiques (réglage gardé sur ce PC) */
+function renderNoStats(){ $('noStats').textContent = LS.get(K_NOSTAT, false) === true ? '📊 Recompter ce PC' : '📊 Ne pas compter ce PC'; }
+$('noStats').onclick = () => {
+  const off = LS.get(K_NOSTAT, false) !== true;
+  if(off) track('reglage/stats-desactivees-sur-un-pc');
+  LS.set(K_NOSTAT, off); renderNoStats();
+  if(!off) track('reglage/stats-reactivees-sur-un-pc');
+  log(off ? '📊 Ce PC n\'est plus compté dans les statistiques.' : '📊 Ce PC est de nouveau compté dans les statistiques.');
+};
+renderNoStats();
 $('tplFields').onclick = async () => {
   if(!TPL){ log('Aucun formulaire déverrouillé.'); return; }
   const PDFLib = await ensurePdfLib();
@@ -1131,6 +1180,7 @@ $('admEnc').onclick = async () => {
     if(check.pdf !== bundle.pdf) throw new Error('vérification échouée, recommence.');
     download(new Blob([enc], {type: 'application/octet-stream'}), 'formulaire.enc');
     $('admPwd1').value = ''; $('admPwd2').value = '';
+    track('admin/formulaire-enc-cree');
     log('🔒 formulaire.enc créé et vérifié (' + sites.length + ' sites). Mets CE fichier sur GitHub, jamais le PDF.');
   }catch(e){ log('⛔ Admin : ' + e.message); alert('Erreur : ' + e.message); }
   finally{ $('admEnc').disabled = false; }
@@ -1257,6 +1307,29 @@ function openMail(d, fileName, win){
   }
   return ccList;
 }
+/* Détails anonymes de chaque demande (aucun nom, site ni adresse) */
+function trackDetails(d){
+  const dt = parseIso($('date').value);
+  const days = Math.round((dt - addDays(0)) / 864e5);
+  const delai = days <= 0 ? 'jour-meme' : days === 1 ? 'lendemain' : days < 10 ? '2-a-9-jours' : days <= 15 ? '10-a-15-jours' : 'plus-de-15-jours';
+  const nature = [d.portail && 'portail', d.portillon && 'portillon', d.chateau && 'chateau-eau'].filter(Boolean).join('+') || 'aucune';
+  const nCc = ccAddresses().length;
+  const jours = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  [
+    'delai/' + delai,
+    d.urgent ? 'detail/urgent' : 'detail/non-urgent',
+    'duree/' + d.duree.replace(/\s+/g, ''),
+    'heure/' + d.heure.slice(0, 2) + 'h',
+    'jour-intervention/' + jours[dt.getDay()],
+    'nature/' + nature,
+    'intervenants/' + (d.pres.length > 4 ? '5-et-plus' : d.pres.length),
+    'copies/' + (nCc > 5 ? '6-et-plus' : nCc),
+    'copie-vendee-eau/' + ($('cc').checked ? 'oui' : 'non'),
+    'prereglage/' + ($('preset').value ? 'utilise' : 'aucun'),
+    'signature/' + ($('sigOn').checked ? $('sigStyle').value : 'sans'),
+    'site/' + (xSites.some(x => coll.compare(x, d.site) === 0) ? 'ajoute-par-utilisateur' : 'liste-officielle')
+  ].forEach(track);
+}
 async function generate(withMail){
   const btns = [$('genPdf'), $('genMail')]; btns.forEach(b => b.disabled = true);
   /* Outlook web : on ouvre l'onglet tout de suite (sinon le navigateur le bloque après la génération) */
@@ -1283,13 +1356,17 @@ async function generate(withMail){
     download(new Blob([bytes], {type: 'application/pdf'}), fileName);
     pushHist('resp', d.resp); pushHist('plaque', d.plaque); pushHist('tel', d.telPb);
     log('✅ PDF officiel rempli : ' + fileName);
+    track(withMail ? 'action/pdf-et-mail' : 'action/pdf-seul');
+    trackDetails(d);
     if(withMail){
       const ccList = openMail(d, fileName, win);
+      track('messagerie/' + ($('mailApp').value === 'pc' ? 'outlook-pc' : 'outlook-web'));
       log('✉️ Mail préparé' + (MAIL_TO ? ' vers ' + MAIL_TO : '') + (ccList.length ? ' (cc ' + ccList.join(', ') + ')' : '') + ' : glisse le PDF dedans.');
       msg('✅ ' + fileName + ' : glisse-le dans le mail', 'var(--ok)');
     } else msg('✅ ' + fileName, 'var(--ok)');
   }catch(e){
     if(win && !win.closed) try{ win.close(); }catch(_){}
+    track(e.missing ? 'erreur/champ-manquant' : /pop-up/.test(e.message) ? 'erreur/popup-outlook-bloquee' : 'erreur/generation-pdf');
     if(e.missing && isCompact()) setCompact(false);   // on déplie pour montrer ce qui manque
     msg('⛔ ' + e.message, 'var(--err)'); log('⛔ ' + e.message);
   }finally{ btns.forEach(b => b.disabled = false); }
@@ -1326,6 +1403,7 @@ document.querySelectorAll('#copyBox [data-copy]').forEach(b => b.onclick = async
     if(await copyText(txt)){
       msg('📋 ' + label + ' copié : fais Ctrl+V dans Outlook', 'var(--ok)');
       log('📋 Copié (' + label + ').');
+      track('copie-mail/' + k);
     } else msg('⛔ Copie refusée par le navigateur', 'var(--err)');
   }catch(e){
     if(e.missing && isCompact()) setCompact(false);
